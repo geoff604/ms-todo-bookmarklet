@@ -38,6 +38,14 @@
     box-sizing: border-box; 
   }
 </style>
+
+<!-- Load the jQuery and jQuery UI libraries. -->
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+<script src="https://ajax.googleapis.com/ajax/libs/jqueryui/1.12.1/jquery-ui.min.js"></script>
+
+<!-- Custom client-side JavaScript code. -->
+<script src="code.js"></script>
+
 </head>
 <body>
 <div id="outer">
@@ -55,13 +63,5 @@
     <input type="submit" name="add" id="add-button" value="Add" />
   </form>
 </div>
-
-<!-- Load the jQuery and jQuery UI libraries. -->
-<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
-<script src="https://ajax.googleapis.com/ajax/libs/jqueryui/1.12.1/jquery-ui.min.js"></script>
-
-<!-- Custom client-side JavaScript code. -->
-<script src="code.js"></script>
-
 </body>
 </html>
