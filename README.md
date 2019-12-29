@@ -8,7 +8,7 @@ Warning - Use at your own risk - script is not secure!
 
 Prerequisite:
 - Knowledge of PHP programming and Apache web server config.
-- A Microsoft account so you can access the Azure Active Directory console.
+- A Microsoft account so you can access the Azure Active Directory console. http://aad.portal.azure.com
 
 You'll need to create an App in Azure Console and give it the permissions stated in the
 Scopes section of backend.php, and set up a client secret and redirect URL.
