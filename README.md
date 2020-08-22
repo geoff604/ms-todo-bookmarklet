@@ -25,5 +25,9 @@ the contents of the file. Clicking on the bookmarklet will open the script in a 
 
 If you have any questions, feel free to email me at geoff.peters@gmail.com
 
+p.s. For similar Bookmarklets that work for Google Tasks instead, please check out:
+- https://github.com/geoff604/google-tasks-bookmarklet-php (for a PHP version)
+- https://github.com/geoff604/google-tasks-bookmarklet (for a Google Apps Script version)
+
 Best regards,
 Geoff
