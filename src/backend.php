@@ -1,5 +1,7 @@
 <?
 
+define('TASK_LISTS_CACHE_PATH', 'tasks-list-cache.json');
+
 $settings = array();
 
 // Update the strings below for your app
@@ -61,6 +63,21 @@ function getHeadersForTaskLists() {
     return $headers;
 }
 
+function storeTaskListsInCache($jsonTaskLists) {
+    file_put_contents(TASK_LISTS_CACHE_PATH, $jsonTaskLists);
+}
+
+function getCachedTaskLists() {
+    header('Content-type: application/json');
+    if (!is_readable(TASK_LISTS_CACHE_PATH)) {
+        echo "[]";
+        return;
+    }
+    $jsonTaskLists = file_get_contents(TASK_LISTS_CACHE_PATH);
+    echo $jsonTaskLists;
+    return;
+}
+
 function getTaskLists() {
     if (!token()) {
         http_response_code(500);
@@ -95,6 +112,7 @@ function getTaskLists() {
     }
 
     $jsonTaskLists = json_encode($resultArray);
+    storeTaskListsInCache($jsonTaskLists);
 
     header('Content-type: application/json');
     echo $jsonTaskLists;
@@ -313,7 +331,9 @@ else if(isset($_GET["add_test_task"])) {
 }
 else if(isset($_GET['method'])) {
     $method = $_GET['method'];
-    if ($method == 'getTaskLists') {
+    if ($method == 'getCachedTaskLists') {
+        getCachedTaskLists();
+    } else if ($method == 'getTaskLists') {
         getTaskLists();
     } else if ($method == 'addTask') {
         addTask($_GET['taskListId'], $_GET['title'], $_GET['note'], $_GET['taskDate']);

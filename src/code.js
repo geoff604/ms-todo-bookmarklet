@@ -12,13 +12,16 @@
     /**
     * Load the available task lists.
     */
-    function loadTaskLists() {  
-        let jqXHR = $.get("backend.php?method=getTaskLists", function(data) {
-            showTaskLists(data);
-        });
-        
-        jqXHR.fail(function() {
+    function loadTaskLists() {
+        var fnFail = function() {
             $("#outer").html("<p>Please <a href=\"backend.php\">Login</a> and try again.</p>");
+        };
+
+        $.get("backend.php?method=getCachedTaskLists", function(data) {
+            showTaskLists(data);
+            $.get("backend.php?method=getTaskLists", function(data) {
+                showTaskListsPreservingSelection(data);
+            }).fail(fnFail);
         });
     }
 
@@ -35,6 +38,21 @@
             .text(taskList.title);
             select.append(option);
         });
+    }
+
+    /**
+    * Show the returned task lists in the dropdown box.
+    * The original selection in the box is preserved.
+    * @param {Array.<Object>} taskLists The task lists to show.
+    */
+    function showTaskListsPreservingSelection(taskLists) {
+        var selectedValue = $('#tasklist').val();
+
+        showTaskLists(taskLists);
+
+        if (selectedValue) {
+            $('#tasklist option[value=' + selectedValue + ']').prop('selected', true);
+        }
     }
 
     /**
