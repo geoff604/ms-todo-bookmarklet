@@ -2,7 +2,7 @@
 A bookmarklet for Microsoft Todo https://todo.microsoft.com/ that allows adding tasks to your todo list from any website.
 
 It's a PHP script that you can host yourself on your web server to allowing adding of tasks
-to your Microsoft Todo List from any website.
+to your Microsoft To Do List from any website.
 
 **Warning - Use at your own risk - script is not secure!**
 
