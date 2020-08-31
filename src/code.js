@@ -1,14 +1,3 @@
-    // When the page loads.
-    $(function() {
-        $('#new-task').bind('submit', onNewTaskFormSubmit);
-
-        datePicker = $("#task-date").datepicker({
-            firstDay: 0
-        });
-
-        loadTaskLists();
-    });
-
     /**
     * Load the available task lists.
     */
@@ -91,3 +80,14 @@
         console.log(error);
         window.alert('An error has occurred, please try again.');
     }
+
+    // When the page loads.
+    $(function() {
+        $('#new-task').bind('submit', onNewTaskFormSubmit);
+
+        datePicker = $("#task-date").datepicker({
+            firstDay: 0
+        });
+
+        loadTaskLists();
+    });
