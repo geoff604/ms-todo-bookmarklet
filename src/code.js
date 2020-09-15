@@ -55,21 +55,31 @@
         var note = noteTextBox.val();
         var dateObj = $("#task-date").datepicker( "getDate" );
         var date = dateObj ? dateObj.getFullYear() + '-' + (dateObj.getMonth()+1) + '-' + dateObj.getDate() : "";
-        var dateArgument = "";
+
+        var dataToSend = {
+            postMethod: "addTask",
+            taskListId: taskListId,
+            title: title,
+            note: note
+        };
+
         if (date) {
-            dateArgument = "&taskDate=" + date;
+            dataToSend.taskDate = date;
         }
 
-        var jqXHR = $.get("backend.php?method=addTask&taskListId=" + encodeURIComponent(taskListId) +
-            "&title=" + encodeURIComponent(title) + "&note=" + encodeURIComponent(note) +
-            dateArgument,
-            function() {
+        var jqXHR = $.ajax({
+            type: "POST",
+            url: 'backend.php',
+            data: dataToSend,
+            dataType: "text",
+            success: function(data) {
                 $("#outer").html("<p>Task added.</p>");
             }
-        );
-        jqXHR.fail(function() {
+        });
+        jqXHR.fail(function(data) {
             $("#outer").html("<p>Unable to add task.</p>");
         });
+
         return false;
     }
 

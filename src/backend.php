@@ -298,7 +298,7 @@ function addTask($taskListId, $title, $note, $taskDate) {
 }
 
 $token = token();
-if($token && !isset($_GET['method']) && !isset($_GET["refresh_token"])) {
+if($token && !isset($_GET['method']) && !isset($_POST['postMethod']) && !isset($_GET["refresh_token"])) {
     echo "<a href='".$settings["redirect_uri"]."''>Home</a>";
     echo " || <a href='".$settings["redirect_uri"]."?refresh_token=true'>Refresh token</a>";
     echo " || <a href='".$settings["redirect_uri"]."?profile=true'>Profile</a>";
@@ -336,7 +336,16 @@ else if(isset($_GET['method'])) {
     } else if ($method == 'getTaskLists') {
         getTaskLists();
     } else if ($method == 'addTask') {
-        addTask($_GET['taskListId'], $_GET['title'], $_GET['note'], $_GET['taskDate']);
+        // Disabling GET for addTask as we now use POST
+        http_response_code(400);
+        echo "GET is no longer supported for addTask. Please use POST instead.";
+        die();
+    }
+}
+else if(isset($_POST['postMethod'])) {
+    $postMethod = $_POST['postMethod'];
+    if ($postMethod == 'addTask') {
+        addTask($_POST['taskListId'], $_POST['title'], $_POST['note'], $_POST['taskDate']);
     }
 }
 else if(isset($_GET["code"])) {
