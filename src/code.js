@@ -6,10 +6,12 @@
             $("#outer").html("<p>Please <a href=\"backend.php\">Login</a> and try again.</p>");
         };
 
-        $.get("backend.php?method=getCachedTaskLists", function(data) {
-            showTaskLists(data);
-            $.get("backend.php?method=getTaskLists", function(data) {
-                showTaskListsPreservingSelection(data);
+        $.get("backend.php?method=getCachedTaskLists", function(cachedData) {
+            showTaskLists(cachedData);
+            $.get("backend.php?method=getTaskLists", function(freshData) {
+                if (JSON.stringify(cachedData) !== JSON.stringify(freshData)) {
+                    showTaskListsPreservingSelection(freshData);
+                }
             }).fail(fnFail);
         });
     }
