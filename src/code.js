@@ -48,6 +48,8 @@
     * A callback function that runs when the new task form is submitted.
     */
     function onNewTaskFormSubmit() {
+        $("#message").html("<p>Please wait...</p>");
+
         var taskListId = $('#tasklist').val();
         var titleTextBox = $('#task-title');
         var noteTextBox = $('#task-note');
@@ -73,11 +75,13 @@
             data: dataToSend,
             dataType: "text",
             success: function(data) {
-                $("#outer").html("<p>Task added.</p>");
+                $("#message").html("<p>Task added.</p>");
+                titleTextBox.val('');
+                noteTextBox.val('');
             }
         });
         jqXHR.fail(function(data) {
-            $("#outer").html("<p>Unable to add task.</p>");
+            $("#message").html("<p>Unable to add task.</p>");
         });
 
         return false;

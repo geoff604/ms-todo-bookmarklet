@@ -41,6 +41,7 @@
 </head>
 <body>
 <div id="outer">
+<div id="message"></div>
 <label for="tasklist">Select a task list: </label>
 <select id="tasklist">
   <option>Loading...</option>
