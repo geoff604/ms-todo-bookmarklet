@@ -27,9 +27,11 @@ selected.
 ## Backend Support (Required)
 The Microsoft Todo Bookmarklet works with the provided PHP script in this Github repo, that will take care of actually
 adding the task to your todo list. You will need to host this PHP script yourself on your web server to make it work. 
+
 If you are not able to do this, I could potentially host this for people on my server, but currently the script is
 not sophisticated enough for a multi user scenario. Therefore, at the current time, to use this Bookmarklet requires
 a working knowledge of how to set up and modify PHP scripts on a web server such as Apache.
+
 PHP is a backend (server side) scripting language that is very common and still quite popular online.
 For more details please see: https://www.php.net/
 
@@ -40,6 +42,7 @@ basic Apache web server config.
 ## Microsoft Account
 You'll need a Microsoft account. You can create a free Microsoft account or you can use one provided by your
 school or employer.
+
 > How to create a new Microsoft account
 > Go to account.microsoft.com, select Sign in, and then choose Create one!
 > If you'd rather create a new email address, choose Get a new email address, choose Next, and then follow the instructions.
@@ -47,6 +50,7 @@ school or employer.
 ## Azure Active Directory Console
 Check that you can log in to the Azure Active Directory console using your Microsoft account.
 This is required to set up the API key and app permissions for this script.
+
 The URL for Azure Active Directory Console is: http://aad.portal.azure.com
 
 ## Creating Your App in Azure Console
@@ -72,6 +76,7 @@ your Office 365 account.
 I recommend setting up a .htaccess file on your server so the directory is protected
 by Basic Authentication (it should not be available publicly on your server as the script
 is most likely NOT secure). 
+
 Also, you should use HTTPS for accessing the script.
 
 ## Setting Up The Bookmarklet In Your Browser
