@@ -93,7 +93,7 @@ task title.
 
 # Support
 This script is evolving over time, and it may become something more sophisticated in the future.
-Right now, it is intended for a highly technical audience and as a starting point for others development.
+Right now, it is intended for a highly technical audience and as a starting point for others' development.
 However, if you have any questions, feel free to email me at geoff.peters@gmail.com
 
 # License
