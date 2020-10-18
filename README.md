@@ -9,7 +9,8 @@ your Office 365 account.
 ## What is a Bookmarklet? 
 From wikipedia:
 > A bookmarklet is a bookmark stored in a web browser that contains JavaScript commands that add new features to the browser. Bookmarklets are unobtrusive JavaScripts stored as the URL of a bookmark in a web browser or as a hyperlink on a web page. Bookmarklets are usually JavaScript programs. Regardless of whether bookmarklet utilities are stored as bookmarks or hyperlinks, they add one-click functions to a browser or web page. When clicked, a bookmarklet performs one of a wide variety of operations, such as running a search query or extracting data from a table. For example, clicking on a bookmarklet after selecting text on a webpage could run an Internet search on the selected text and display a search engine results page.
-(See: https://en.wikipedia.org/wiki/Bookmarklet )
+
+See: https://en.wikipedia.org/wiki/Bookmarklet
 
 # How it works:
 - You'll need to set up the Microsoft To Do Bookmarklet in your browser bookmark toolbar, and configure the backend
@@ -55,6 +56,7 @@ Then, update backend.php with your app id and client secret, and redirect URL.
 
 ## Setting Up The Backend PHP Script
 You'll need to modify backend.php to fill in the following placeholder settings:
+
     // Update the strings below for your app
     $settings["client_id"] = "sample-123-234-1231-31231-231";
     $settings["client_secret"] = "sample-123-234-1231-31231-231";
@@ -97,5 +99,3 @@ For similar Bookmarklets that work for Google Tasks instead, please check out:
 - https://github.com/geoff604/google-tasks-bookmarklet-php (for a PHP version)
 - https://github.com/geoff604/google-tasks-bookmarklet (for a Google Apps Script version)
 
-Best regards,
-Geoff
