@@ -26,31 +26,7 @@ $settings["auth_url"] .= "&redirect_uri=".$settings["redirect_uri"];
 $settings["auth_url"] .= "&response_type=code&scope=".implode(" ", $settings["scopes"]);
 $settings["token_url"] = "/common/oauth2/v2.0/token";
 
-// TODO: When Microsoft makes the API no longer beta, will need to provide the updated
-// API URL here.
-$settings["api_url"] = "https://graph.microsoft.com/beta";
-
-function add_test_task() {
-    global $settings;
-
-    $headers = array(
-        "User-Agent: php-tutorial/1.0",
-        "Authorization: Bearer ".token()->access_token,
-        "Accept: application/json",
-        "Content-Type: application/json",
-        "client-request-id: ".makeGuid(),
-        "return-client-request-id: true"
-    );
-    $post_body = '{"subject": "Test Task 01",';
-    $post_body .= '"body": {"contentType": "text","content": "Test body"},';
-    $post_body .= '"dueDateTime": {"dateTime": "2019-12-27T08:00:00.0000000","timeZone": "UTC"}}';
-
-    // TODO: The folder ID is hardcoded here, and will not work unless it is modified.
-    $outlookApiUrl = $settings["api_url"] . "/me/outlook/taskFolders/AQMkADAwATM3ZmYAZS1jZjlhLTllMGEtMDACLTAwCgAuAAAD4QDr0T6dTEuSl2iiYjueDwEA48AWShDzTUqQN5ToEiORbwADDwnpmAAAAA==/tasks";
-
-    $response = runCurl($outlookApiUrl, $post_body, $headers);
-    echo "<pre>"; print_r($response); echo "</pre>";
-}
+$settings["api_url"] = "https://graph.microsoft.com/v1.0";
 
 function getHeadersForTaskLists() {
     $headers = array(
@@ -85,12 +61,12 @@ function getTaskLists() {
         die();
     }
     global $settings;
-    $top = 50;
+    $top = 100;
     $search = array (
         // Return at most n results
         "\$top" => $top
     );
-    $outlookApiUrl = $settings["api_url"] . "/me/outlook/taskFolders?" . http_build_query($search);
+    $outlookApiUrl = $settings["api_url"] . "/me/todo/lists?" . http_build_query($search);
     $response = runCurl($outlookApiUrl, null, getHeadersForTaskLists(), true);
     
     if ($response == null) {
@@ -105,7 +81,7 @@ function getTaskLists() {
     $resultArray = array();
     foreach ($response['value'] as $taskList) {
         $arrItem = array(
-            'title' => $taskList['name'],
+            'title' => $taskList['displayName'],
             'id' => $taskList['id']
         );
         array_push($resultArray, $arrItem);
@@ -117,54 +93,6 @@ function getTaskLists() {
     header('Content-type: application/json');
     echo $jsonTaskLists;
     return;
-}
-
-function list_folders() {
-    global $settings;
-    $headers = array(
-        "User-Agent: php-tutorial/1.0",
-        "Authorization: Bearer ".token()->access_token,
-        "Accept: application/json",
-        "client-request-id: ".makeGuid(),
-        "return-client-request-id: true"
-    );
-    $top = 50;
-    $search = array (
-        // Return at most n results
-        "\$top" => $top
-    );
-    $outlookApiUrl = $settings["api_url"] . "/me/outlook/taskFolders?" . http_build_query($search);
-    $response = runCurl($outlookApiUrl, null, $headers);
-    $response = explode("\n", trim($response));
-    $response = $response[count($response) - 1];
-    $response = json_decode($response, true);
-    echo "<pre>"; print_r($response); echo "</pre>";
-}
-
-function list_tasks_in_folder() {
-    global $settings;
-    $headers = array(
-        "User-Agent: php-tutorial/1.0",
-        "Authorization: Bearer ".token()->access_token,
-        "Accept: application/json",
-        "client-request-id: ".makeGuid(),
-        "return-client-request-id: true"
-    );
-    $top = 50;
-    $search = array (
-        // Return at most n results
-        "\$top" => $top
-    );
-
-    // TODO: The folder ID is hardcoded here, and will not work unless it is modified.
-    $outlookApiUrl = $settings["api_url"] . "/me/outlook/taskFolders/AQMkADAwATM3ZmYAZS1jZjlhLTllMGEtMDACLTAwCgAuAAAD4QDr0T6dTEuSl2iiYjueDwEA48AWShDzTUqQN5ToEiORbwADDwnpmAAAAA==/tasks?" . http_build_query($search);
-
-    $response = runCurl($outlookApiUrl, null, $headers);
-    echo "<pre>"; print_r($response); echo "</pre>";
-    $response = explode("\n", trim($response));
-    $response = $response[count($response) - 1];
-    $response = json_decode($response, true);
-    echo "<pre>"; print_r($response); echo "</pre>";
 }
 
 function refresh_token($skipRedirect = false) {
@@ -285,13 +213,13 @@ function addTask($taskListId, $title, $note, $taskDate) {
         "client-request-id: ".makeGuid(),
         "return-client-request-id: true"
     );
-    $post_body = '{"subject": ' . json_encode($title) .',';
+    $post_body = '{"title": ' . json_encode($title) .',';
     $post_body .= '"body": {"contentType": "text","content": '. json_encode($note) .'}';
     if ($taskDate != '') {
         $post_body .= ',"dueDateTime": {"dateTime": "' . $taskDate . 'T08:00:00.0000000","timeZone": "UTC"}';
     }
     $post_body .= '}';
-    $outlookApiUrl = $settings["api_url"] . "/me/outlook/taskFolders/" . $taskListId ."/tasks";
+    $outlookApiUrl = $settings["api_url"] . "/me/todo/lists/" . $taskListId ."/tasks";
     $response = runCurl($outlookApiUrl, $post_body, $headers);
     echo "<pre>"; print_r($response); echo "</pre>";
     return;
@@ -302,9 +230,6 @@ if($token && !isset($_GET['method']) && !isset($_POST['postMethod']) && !isset($
     echo "<a href='".$settings["redirect_uri"]."''>Home</a>";
     echo " || <a href='".$settings["redirect_uri"]."?refresh_token=true'>Refresh token</a>";
     echo " || <a href='".$settings["redirect_uri"]."?profile=true'>Profile</a>";
-    echo " || <a href='".$settings["redirect_uri"]."?list_folders=true'>List Folders</a>";
-    echo " || <a href='".$settings["redirect_uri"]."?list_tasks_in_folder=true'>List Tasks in Folder</a>";
-    echo " || <a href='".$settings["redirect_uri"]."?add_test_task=true'>Add Test Task</a>";
     echo " || <a href='".$settings["redirect_uri"]."?logout=true'>Logout</a><br/><br/>\n\n";
 }
 
@@ -319,15 +244,6 @@ else if(isset($_GET["profile"])) {
 }
 else if(isset($_GET["refresh_token"])) {
     refresh_token();
-}
-else if(isset($_GET["list_folders"])) {
-    list_folders();
-}
-else if(isset($_GET["list_tasks_in_folder"])) {
-    list_tasks_in_folder();
-}
-else if(isset($_GET["add_test_task"])) {
-    add_test_task();
 }
 else if(isset($_GET['method'])) {
     $method = $_GET['method'];
