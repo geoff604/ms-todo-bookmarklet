@@ -58,14 +58,16 @@
     margin: 5px;
     content: "\f005";
     display: inline-block;
-    font-size: 1em;
-    color: #ccc;
+    font-size: 1.2em;
+    text-shadow: 0px 0px 1px #000, 0px 0px 1px #000, 0px 0px 1px #000, 0px 0px 1px #000, 0px 0px 1px #000;
+    color: white;  
     -webkit-user-select: none;
     -moz-user-select: none;
     user-select: none;
   }
   input.star:checked ~ label.star:before {
     color: #FFC107;
+    text-shadow: none;
   }
 </style>
 </head>
@@ -78,7 +80,7 @@
 </select>
 <br/>
     <input type="checkbox" class="star" name="favstar" id="favstar" value="1" />
-    <label title="Favorite" for="favstar" class="star"></label>
+    <label title="Mark as important" for="favstar" class="star"></label>
     <label for="task-title">Title:</label>
     <input type="text" maxlength="250" name="task-title" id="task-title" autofocus value="<? print(isSet($_GET['startingTitle']) ? htmlEntities($_GET['startingTitle'], ENT_QUOTES) : ''); ?>"/>
     <label for="task-date">Date:</label>
