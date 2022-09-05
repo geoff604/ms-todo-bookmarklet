@@ -20,6 +20,7 @@ bookmarklet to open up a popup window for entering task details.
 - In the popup window, the title of the webpage you are viewing will be populated into the title of the task, 
 and the title and URL of the page will be populated into the notes section of the task.
 - You are free to modify the title, notes, and set a date and choose your task list to add the task list.
+- Click the Star icon next to the task Title to make the task marked Important when it is added.
 - Then click the Add button and the task will be automatically added into your Microsoft To Do task list that you
 selected.
 
