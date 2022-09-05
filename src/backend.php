@@ -61,7 +61,7 @@ function getTaskLists() {
         die();
     }
     global $settings;
-    $top = 100;
+    $top = 200;
     $search = array (
         // Return at most n results
         "\$top" => $top
@@ -202,7 +202,7 @@ function runCurl($url, $post = null, $headers = null, $nullOnFailure = false) {
 }
 
 // taskDate is a string in form: 2010-10-15
-function addTask($taskListId, $title, $note, $taskDate) {
+function addTask($taskListId, $title, $note, $taskDate, $isImportant) {
     global $settings;
 
     $headers = array(
@@ -218,6 +218,9 @@ function addTask($taskListId, $title, $note, $taskDate) {
     if ($taskDate != '') {
         $post_body .= ',"dueDateTime": {"dateTime": "' . $taskDate . 'T08:00:00.0000000","timeZone": "UTC"}';
     }
+	if ($isImportant == 'true') {
+		$post_body .= ',"importance": "high"';
+	}
     $post_body .= '}';
     $outlookApiUrl = $settings["api_url"] . "/me/todo/lists/" . $taskListId ."/tasks";
     $response = runCurl($outlookApiUrl, $post_body, $headers);
@@ -261,7 +264,9 @@ else if(isset($_GET['method'])) {
 else if(isset($_POST['postMethod'])) {
     $postMethod = $_POST['postMethod'];
     if ($postMethod == 'addTask') {
-        addTask($_POST['taskListId'], $_POST['title'], $_POST['note'], $_POST['taskDate']);
+		$note = isset($_POST['note']) ? $_POST['note'] : '';
+		$taskDate = isset($_POST['taskDate']) ? $_POST['taskDate'] : '';
+        addTask($_POST['taskListId'], $_POST['title'], $note, $taskDate, $_POST['isImportant']);
     }
 }
 else if(isset($_GET["code"])) {

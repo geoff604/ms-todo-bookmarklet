@@ -55,6 +55,8 @@
         var taskListId = $('#tasklist').val();
         var titleTextBox = $('#task-title');
         var noteTextBox = $('#task-note');
+        var favStarCheck = $('#favstar');
+        var isImportant = !!favStarCheck.prop("checked");
         var title = titleTextBox.val();
         var note = noteTextBox.val();
         var dateObj = $("#task-date").datepicker( "getDate" );
@@ -64,7 +66,8 @@
             postMethod: "addTask",
             taskListId: taskListId,
             title: title,
-            note: note
+            note: note,
+            isImportant: isImportant
         };
 
         if (date) {
