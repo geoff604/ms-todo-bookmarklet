@@ -61,7 +61,7 @@ function getTaskLists() {
         die();
     }
     global $settings;
-    $top = 200;
+    $top = 90000;
     $search = array (
         // Return at most n results
         "\$top" => $top
