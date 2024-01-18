@@ -61,30 +61,38 @@ function getTaskLists() {
         die();
     }
     global $settings;
-    $top = 90000;
-    $search = array (
-        // Return at most n results
-        "\$top" => $top
-    );
-    $outlookApiUrl = $settings["api_url"] . "/me/todo/lists?" . http_build_query($search);
-    $response = runCurl($outlookApiUrl, null, getHeadersForTaskLists(), true);
-    
-    if ($response == null) {
-        refresh_token(true);
-        $response = runCurl($outlookApiUrl, null, getHeadersForTaskLists());
-    }
-
-    $response = explode("\n", trim($response));
-    $response = $response[count($response) - 1];
-    $response = json_decode($response, true);
-
+    $nextLinkKey = "@odata.nextLink";
+    $outlookApiUrl = $settings["api_url"] . "/me/todo/lists/delta";
+    $keepGoing = true;
     $resultArray = array();
-    foreach ($response['value'] as $taskList) {
-        $arrItem = array(
-            'title' => $taskList['displayName'],
-            'id' => $taskList['id']
-        );
-        array_push($resultArray, $arrItem);
+
+    while($keepGoing) {
+        $response = runCurl($outlookApiUrl, null, getHeadersForTaskLists(), true);
+        
+        if ($response == null) {
+            refresh_token(true);
+            $response = runCurl($outlookApiUrl, null, getHeadersForTaskLists());
+        }
+
+        $response = explode("\n", trim($response));
+        $response = $response[count($response) - 1];
+        $response = json_decode($response, true);
+
+        foreach ($response['value'] as $taskList) {
+            if ($taskList['displayName'] == 'Flagged Emails') {
+                continue;
+            }
+            $arrItem = array(
+                'title' => $taskList['displayName'],
+                'id' => $taskList['id']
+            );
+            array_push($resultArray, $arrItem);
+        }
+        if (array_key_exists($nextLinkKey, $response) && !empty($response[$nextLinkKey])) {
+            $outlookApiUrl = $response[$nextLinkKey];
+        } else {
+            $keepGoing = false;
+        }
     }
 
     $jsonTaskLists = json_encode($resultArray);
