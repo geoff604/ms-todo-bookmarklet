@@ -54,6 +54,26 @@ function getCachedTaskLists() {
     return;
 }
 
+// Function to remove emoji from the start of the title so that it can be sorted properly
+function removeEmojiForSort($title) {
+    // Remove emojis and spaces at the beginning
+    return preg_replace('/^(?:[\x{1F600}-\x{1F64F}]|[\x{1F300}-\x{1F5FF}]|[\x{1F680}-\x{1F6FF}]|[\x{1F700}-\x{1F77F}]|[\x{1F780}-\x{1F7FF}]|[\x{1F800}-\x{1F8FF}]|[\x{1F900}-\x{1F9FF}]|[\x{1FA00}-\x{1FA6F}]|[\x{1FA70}-\x{1FAFF}]|\s)+/u', '', $title);
+}
+
+// Sort the task list array with correct handling of lists with emoji's in the title
+function sortTaskListArray(&$resultArray) {
+    // Keep the first entry
+    $firstEntry = array_shift($resultArray);
+
+    // Sort the remaining entries
+    usort($resultArray, function($a, $b) {
+        return strcmp(removeEmojiForSort($a['title']), removeEmojiForSort($b['title']));
+    });
+
+    // Add the first entry back to the start
+    array_unshift($resultArray, $firstEntry);
+}
+
 function getTaskLists() {
     if (!token()) {
         http_response_code(500);
@@ -94,6 +114,8 @@ function getTaskLists() {
             $keepGoing = false;
         }
     }
+
+    sortTaskListArray($resultArray);
 
     $jsonTaskLists = json_encode($resultArray);
     storeTaskListsInCache($jsonTaskLists);
