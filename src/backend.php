@@ -56,8 +56,44 @@ function getCachedTaskLists() {
 
 // Function to remove emoji from the start of the title so that it can be sorted properly
 function removeEmojiForSort($title) {
-    // Remove emojis and spaces at the beginning
-    return preg_replace('/^(?:[\x{1F600}-\x{1F64F}]|[\x{1F300}-\x{1F5FF}]|[\x{1F680}-\x{1F6FF}]|[\x{1F700}-\x{1F77F}]|[\x{1F780}-\x{1F7FF}]|[\x{1F800}-\x{1F8FF}]|[\x{1F900}-\x{1F9FF}]|[\x{1FA00}-\x{1FA6F}]|[\x{1FA70}-\x{1FAFF}]|[\x{2600}-\x{26FF}]|[\x{2700}-\x{27BF}]|[\x{1F680}-\x{1F6FF}]|\s)+/u', '', $title);
+    return preg_replace(
+        '/^(?:' .
+        '[\x{0080}-\x{02AF}]|' .        // Latin-1 Supplement, IPA Extensions
+        '[\x{0300}-\x{03FF}]|' .        // Combining Diacritical Marks, Greek
+        '[\x{0600}-\x{06FF}]|' .        // Arabic
+        '[\x{0C00}-\x{0C7F}]|' .        // Telugu
+        '[\x{1DC0}-\x{1DFF}]|' .        // Combining Diacritical Marks Supplement
+        '[\x{1E00}-\x{1EFF}]|' .        // Latin Extended Additional
+        '[\x{2000}-\x{209F}]|' .        // General Punctuation
+        '[\x{20D0}-\x{214F}]|' .        // Combining Diacritical Marks for Symbols, Letterlike Symbols
+        '[\x{2190}-\x{23FF}]|' .        // Arrows, Mathematical Operators
+        '[\x{2460}-\x{25FF}]|' .        // Enclosed Alphanumerics, Geometric Shapes
+        '[\x{2600}-\x{27EF}]|' .        // Miscellaneous Symbols, Dingbats
+        '[\x{2900}-\x{29FF}]|' .        // Supplemental Arrows-B
+        '[\x{2B00}-\x{2BFF}]|' .        // Miscellaneous Symbols and Arrows
+        '[\x{2C60}-\x{2C7F}]|' .        // Latin Extended-C
+        '[\x{2E00}-\x{2E7F}]|' .        // Supplemental Punctuation
+        '[\x{3000}-\x{303F}]|' .        // CJK Symbols and Punctuation
+        '[\x{A490}-\x{A4CF}]|' .        // Yi Radicals
+        '[\x{E000}-\x{F8FF}]|' .        // Private Use Area
+        '[\x{FE00}-\x{FE0F}]|' .        // Variation Selectors
+        '[\x{FE30}-\x{FE4F}]|' .        // CJK Compatibility Forms
+        '[\x{1F000}-\x{1F02F}]|' .      // Mahjong Tiles
+        '[\x{1F0A0}-\x{1F0FF}]|' .      // Playing Cards
+        '[\x{1F100}-\x{1F64F}]|' .      // Enclosed Alphanumeric Supplement, Emoticons
+        '[\x{1F680}-\x{1F6FF}]|' .      // Transport and Map Symbols
+        '[\x{1F700}-\x{1F77F}]|' .      // Alchemical Symbols
+        '[\x{1F780}-\x{1F7FF}]|' .      // Geometric Shapes Extended
+        '[\x{1F800}-\x{1F8FF}]|' .      // Supplemental Arrows-C
+        '[\x{1F900}-\x{1F9FF}]|' .      // Supplemental Symbols and Pictographs
+        '[\x{1FA00}-\x{1FA6F}]|' .      // Chess Symbols, Symbols and Pictographs Extended-A
+        '[\x{1FA70}-\x{1FAFF}]|' .      // Symbols and Pictographs Extended-B
+        '[\x{20000}-\x{2FFFF}]|' .      // CJK Unified Ideographs Extension B-C
+        '\s' .                          // Space
+        ')+/u',
+        '',
+        $title
+    );
 }
 
 // Sort the task list array with correct handling of lists with emoji's in the title
