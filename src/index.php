@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
 <head>
-<link rel="stylesheet" href="https://ajax.googleapis.com/ajax/libs/jqueryui/1.13.2/themes/smoothness/jquery-ui.css">
+<link rel="stylesheet" href="https://ajax.googleapis.com/ajax/libs/jqueryui/1.14.1/themes/smoothness/jquery-ui.css">
 <link rel="stylesheet" href="fontawesome/css/fontawesome.min.css">
 <link rel="stylesheet" href="fontawesome/css/solid.min.css">
 
@@ -29,7 +29,7 @@
   }
   #task-note {
     flex-grow: 1;
-    width: calc(100% - 20px);
+    width: 100%;
     margin-top: 5px;
     resize: none;
   }
@@ -39,6 +39,7 @@
     width: 100%;
     height: 100%;
     padding: 10px;
+    padding-right: 15px;
     position: absolute;
     box-sizing: border-box; 
   }
@@ -124,8 +125,8 @@
 </div>
 
 <!-- Load the jQuery and jQuery UI libraries. -->
-<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
-<script src="https://ajax.googleapis.com/ajax/libs/jqueryui/1.13.2/jquery-ui.min.js"></script>
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
+<script src="https://ajax.googleapis.com/ajax/libs/jqueryui/1.14.1/jquery-ui.min.js"></script>
 
 <!-- Custom client-side JavaScript code. -->
 <script src="code.js"></script>
