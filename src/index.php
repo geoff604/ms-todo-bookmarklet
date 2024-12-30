@@ -28,15 +28,30 @@
     width: 450px;
   }
   #task-note {
+    flex-grow: 1;
     width: calc(100% - 20px);
-    height: 150px;
-    margin-top:5px;
+    margin-top: 5px;
+    resize: none;
   }
   #outer {
+    display: flex;
+    flex-direction: column;
     width: 100%;
+    height: 100%;
     padding: 10px;
-    position: relative;
+    position: absolute;
     box-sizing: border-box; 
+  }
+  .fixed-container {
+    flex-shrink: 0;
+  }
+  #form-container {
+    display: flex;
+    flex-direction: column;
+    flex-grow: 1;
+  }
+  #add-button {
+    margin-top: 5px;
   }
   input.star {
     border: 0;
@@ -69,26 +84,43 @@
     color: #FFC107;
     text-shadow: none;
   }
+  .inline-label-input {
+    display: inline-block;
+    margin-right: 10px;
+    margin-bottom: 5px;
+  }
 </style>
 </head>
 <body>
 <div id="outer">
-<div id="message"></div>
-<label for="tasklist">Select a task list: </label>
-<select id="tasklist">
-  <option>Loading...</option>
-</select>
-<br/>
-    <input type="checkbox" class="star" name="favstar" id="favstar" value="1" />
-    <label title="Mark as important" for="favstar" class="star"></label>
-    <label for="task-title">Title:</label>
-    <input type="text" maxlength="250" name="task-title" id="task-title" autofocus value="<? print(isSet($_GET['startingTitle']) ? htmlEntities($_GET['startingTitle'], ENT_QUOTES) : ''); ?>"/>
-    <label for="task-date">Date:</label>
-    <input type="text" name="task-date" id="task-date" />
+  <div class="fixed-container">
+    <div id="message"></div>
+    <div class="inline-label-input">
+      <label for="tasklist">Select a task list: </label>
+      <select id="tasklist">
+        <option>Loading...</option>
+      </select>
+    </div>
+    <br/>
+    <div class="inline-label-input">
+      <input type="checkbox" class="star" name="favstar" id="favstar" value="1" />
+      <label title="Mark as important" for="favstar" class="star"></label>
+      <label for="task-title">Title:</label>
+      <input type="text" maxlength="250" name="task-title" id="task-title" autofocus value="<? print(isSet($_GET['startingTitle']) ? htmlEntities($_GET['startingTitle'], ENT_QUOTES) : ''); ?>"/>
+    </div>
+    <div class="inline-label-input">
+      <label for="task-date">Date:</label>
+      <input type="text" name="task-date" id="task-date" />
+    </div>
+  </div>
+  <div id="form-container">
     <textarea name="task-note" id="task-note"><? print(isSet($_GET['startingNote']) ? htmlEntities($_GET['startingNote'], ENT_QUOTES) : ''); ?></textarea>
+  </div>
+  <div class="fixed-container">
     <form name="new-task" id="new-task"> 
-    <input type="submit" name="add" id="add-button" value="Add" />
-  </form>
+      <input type="submit" name="add" id="add-button" value="Add" />
+    </form>
+  </div>
 </div>
 
 <!-- Load the jQuery and jQuery UI libraries. -->
