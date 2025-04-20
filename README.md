@@ -82,15 +82,24 @@ Also, you should use HTTPS for accessing the script.
 
 ## Setting Up The Bookmarklet In Your Browser
 You will need to add a bookmarklet to your browser bar, by opening the file
-bookmarklet.txt, optionally modifying the script, and then adding a bookmark in your browser with
-the contents of the file. Clicking on the bookmarklet will open the script in a popup window.
+bookmarklet-improved.txt, modifying the script as suggested below, and then adding a
+bookmark in your browser with the contents of the file. Clicking on the bookmarklet will open
+the script in a popup window.
 
-Note: you can replace my gmail address in the bookmarklet with your own, if you would like smarter
-handling of window titles in Gmail when adding a task to Microsoft To Do from a Gmail message.
-The current code will strip out my email address from the task title to make the title
-more convenient to use in the Microsot Todo task list. By changing it to your gmail address
-it will strip out your email address from the Gmail web page title when generating the initial
-task title.
+### How to Modify the Bookmarklet Before Using It
+You'll see in bookmarklet-improved.txt that there is an example URL such as:
+https://gpeters.com/tasks/ms/index.php
+You'll need to update that URL in the bookmarklet to point to the location of the index.php of this project
+on your own server.
+
+You will also see my email address contained in the bookmarklet. The purpose of this is to
+remove my email address from the task title when adding a task from Gmail on the web.
+You can replace my gmail address in the bookmarklet with your own, if you like.
+The bookmarklet populates the initial task title with the current window's title.
+When you are adding a task to Microsoft To Do from a Gmail message, the code will strip out
+my email address from the task title to make the title more convenient to use in the
+Microsoft Todo task list. By changing it to your gmail address it will strip out your
+email address from the Gmail web page title when generating the initial task title.
 
 # Support
 This script is evolving over time, and it may become something more sophisticated in the future.
