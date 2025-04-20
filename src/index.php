@@ -7,6 +7,10 @@
 
 <!-- Custom styles. -->
 <style>
+  :root {
+    --glow-color: rgb(77, 145, 254);
+  }
+
   body {
     width: 100%;
     font-family: 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
@@ -155,7 +159,12 @@
   input.star:focus ~ label.star:before {
     border-color: #4d90fe;
     outline: none;
-    box-shadow: 0 0 0 2px rgba(77,144,254,0.2);
+    text-shadow: 
+      0px 0px 1px var(--glow-color),
+      0px 0px 1px var(--glow-color),
+      0px 0px 1px var(--glow-color),
+      0px 0px 1px var(--glow-color),
+      0px 0px 1px var(--glow-color);
   }
 
   .inline-label-input {
