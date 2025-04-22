@@ -196,7 +196,7 @@
   }
 
   select::-webkit-scrollbar {
-    width: 32px; /* Adjust the width */
+    width: 40px; /* Adjust the width */
   }
 
   select::-webkit-scrollbar-thumb {
