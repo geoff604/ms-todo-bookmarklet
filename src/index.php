@@ -195,6 +195,18 @@
     box-shadow: 0 0 0 2px rgba(77,144,254,0.2);
   }
 
+  select::-webkit-scrollbar {
+    width: 32px; /* Adjust the width */
+  }
+
+  select::-webkit-scrollbar-thumb {
+    background-color: #888; /* Color of the scrollbar thumb */
+    border-radius: 4px;
+  }
+
+  select::-webkit-scrollbar-track {
+    background-color: #f1f1f1; /* Track background color */
+  }
 </style>
 </head>
 <body>
