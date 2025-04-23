@@ -200,12 +200,12 @@
   }
 
   select::-webkit-scrollbar-thumb {
-    background-color: #888; /* Color of the scrollbar thumb */
-    border-radius: 4px;
+    background-color: rgba(66, 133, 244, 0.4); /* Color of the scrollbar thumb */
+    border-radius: 6px;
   }
 
   select::-webkit-scrollbar-track {
-    background-color: #f1f1f1; /* Track background color */
+    background-color: rgba(77, 144, 254, 0.05); /* Track background color */
   }
 </style>
 </head>
