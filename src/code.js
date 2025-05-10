@@ -100,12 +100,41 @@
         window.alert('An error has occurred, please try again.');
     }
 
+    /**
+    * Apply theme-specific styling to jQuery UI datepicker
+    */
+    function updateDatepickerTheme() {
+        const isDarkMode = document.documentElement.classList.contains('dark-mode');
+        if (isDarkMode) {
+            // Force redraw of datepicker with dark theme
+            if (datePicker.datepicker('widget').is(':visible')) {
+                datePicker.datepicker('hide');
+                datePicker.datepicker('show');
+            }
+        }
+    }
+
     // When the page loads.
     $(function() {
         $('#new-task').bind('submit', onNewTaskFormSubmit);
 
         datePicker = $("#task-date").datepicker({
-            firstDay: 0
+            firstDay: 0,
+            beforeShow: function(input, inst) {
+                // Apply theme class to datepicker
+                setTimeout(function() {
+                    if (document.documentElement.classList.contains('dark-mode')) {
+                        inst.dpDiv.addClass('dark-mode');
+                    } else {
+                        inst.dpDiv.removeClass('dark-mode');
+                    }
+                }, 0);
+            }
+        });
+
+        // Listen for theme changes to update datepicker
+        $('#theme-toggle').on('click', function() {
+            setTimeout(updateDatepickerTheme, 10);
         });
 
         loadTaskLists();
