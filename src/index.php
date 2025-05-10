@@ -254,7 +254,6 @@
     background-color: var(--scrollbar-track); /* Track background color */
   }
 
-  /* Theme toggle button */
   #theme-toggle {
     position: absolute;
     top: 12px;
@@ -266,11 +265,17 @@
     cursor: pointer;
     color: var(--text-primary);
     background-color: var(--bg-secondary);
-    transition: all 0.2s ease;
+    transition: border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out;
   }
 
   #theme-toggle:hover {
     background-color: var(--border-color);
+  }
+
+  #theme-toggle:focus {
+    border-color: var(--glow-color);
+    outline: none;
+    box-shadow: 0 0 0 2px var(--glow-shadow);
   }
 
   /* jQuery UI datepicker overrides for dark mode */
