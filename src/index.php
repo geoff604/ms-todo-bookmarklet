@@ -23,6 +23,7 @@
     --star-color: #C8C8C8;
     --star-checked: #FFC107;
     --star-shadow: #000;
+	--star-focus-shadow-width: 1px;
     --scrollbar-thumb: rgba(66, 133, 244, 0.4);
     --scrollbar-track: rgba(77, 144, 254, 0.05);
   }
@@ -43,6 +44,7 @@
     --star-color: #333;
     --star-checked: #FFC107;
     --star-shadow: #000;
+	--star-focus-shadow-width: 2px;
     --scrollbar-thumb: rgba(66, 133, 244, 0.6);
     --scrollbar-track: rgba(77, 144, 254, 0.1);
   }
@@ -202,11 +204,11 @@
     border-color: var(--glow-color);
     outline: none;
     text-shadow: 
-      0px 0px 1px var(--glow-color),
-      0px 0px 1px var(--glow-color),
-      0px 0px 1px var(--glow-color),
-      0px 0px 1px var(--glow-color),
-      0px 0px 1px var(--glow-color);
+      0px 0px var(--star-focus-shadow-width) var(--glow-color),
+      0px 0px var(--star-focus-shadow-width) var(--glow-color),
+      0px 0px var(--star-focus-shadow-width) var(--glow-color),
+      0px 0px var(--star-focus-shadow-width) var(--glow-color),
+      0px 0px var(--star-focus-shadow-width) var(--glow-color);
   }
 
   .inline-label-input {
