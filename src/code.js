@@ -31,19 +31,73 @@
         });
     }
 
+    function getScrollInfoForSelect(select) {
+        var scrollTop = 0;
+        var wasOpen = false;
+        
+        // Check if dropdown is currently open and get scroll position
+        // Different browsers handle this differently
+        try {
+            // For Chrome/Safari - check if the dropdown list is visible
+            var selectElement = select[0];
+            if (selectElement.size > 1 || (selectElement.multiple && selectElement.clientHeight > selectElement.scrollHeight)) {
+                wasOpen = true;
+                scrollTop = selectElement.scrollTop;
+            }
+            // Alternative method - check if dropdown has focus and was recently clicked
+            else if (document.activeElement === selectElement) {
+                // Store scroll position from the native select element
+                scrollTop = selectElement.scrollTop;
+                wasOpen = true;
+            }
+        } catch (e) {
+            // Fallback - just capture scroll position if element has focus
+            if (document.activeElement === select[0]) {
+                scrollTop = select[0].scrollTop;
+                wasOpen = true;
+            }
+        }
+        return { scrollTop: scrollTop, wasOpen: wasOpen };
+    }
+
+    function restoreScrollPosition(select, scrollTop, wasOpen) {  
+        // Restore scroll position if dropdown was open
+        if (wasOpen && scrollTop > 0) {
+            // Use setTimeout to ensure the DOM has updated
+            setTimeout(function() {
+                try {
+                    select[0].scrollTop = scrollTop;
+                    // Force focus back to maintain dropdown state
+                    if (document.activeElement !== select[0]) {
+                        select.focus();
+                    }
+                } catch (e) {
+                    // Silently fail if scroll restoration doesn't work
+                    console.log('Could not restore scroll position:', e);
+                }
+            }, 0);
+        }
+    }
+
     /**
     * Show the returned task lists in the dropdown box.
-    * The original selection in the box is preserved.
+    * The original selection in the box is preserved, along with scroll position.
     * @param {Array.<Object>} taskLists The task lists to show.
     */
     function showTaskListsPreservingSelection(taskLists) {
-        var selectedValue = $('#tasklist').val();
+        var select = $('#tasklist');
+        var selectedValue = select.val();
+
+        var { scrollTop, wasOpen } = getScrollInfoForSelect(select);
 
         showTaskLists(taskLists);
 
+        // Restore selection
         if (selectedValue) {
             $('#tasklist').val(selectedValue);
         }
+
+        restoreScrollPosition(select, scrollTop, wasOpen);
     }
 
     /**
