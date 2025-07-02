@@ -1,3 +1,6 @@
+    // Global variable to track dropdown state
+    var isDropdownOpen = false;
+
     /**
     * Load the available task lists.
     */
@@ -10,7 +13,13 @@
             showTaskLists(cachedData);
             $.get("backend.php?method=getTaskLists", function(freshData) {
                 if (JSON.stringify(cachedData) !== JSON.stringify(freshData)) {
-                    showTaskListsPreservingSelection(freshData);
+                    if (isDropdownOpen) {
+                        // Store the fresh data to update later
+                        window.pendingTaskListUpdate = freshData;
+                    } else {
+                        // Update immediately if dropdown is closed
+                        showTaskListsPreservingSelection(freshData);
+                    }
                 }
             }).fail(fnFail);
         });
@@ -43,6 +52,16 @@
 
         if (selectedValue) {
             $('#tasklist').val(selectedValue);
+        }
+    }
+
+    /**
+    * Handle dropdown close event and apply pending updates
+    */
+    function onDropdownClose() {
+        if (window.pendingTaskListUpdate) {
+            showTaskListsPreservingSelection(window.pendingTaskListUpdate);
+            window.pendingTaskListUpdate = null;
         }
     }
 
@@ -136,6 +155,29 @@
         $('#theme-toggle').on('click', function() {
             setTimeout(updateDatepickerTheme, 10);
         });
+
+        // Add event listeners to track dropdown state
+        $('#tasklist')
+            .on('focus', function() {
+                isDropdownOpen = true;
+            })
+            .on('blur', function() {
+                // Use a slight delay to allow selection to complete
+                setTimeout(function() {
+                    isDropdownOpen = false;
+                    onDropdownClose();
+                }, 150);
+            })
+            .on('change', function() {
+                isDropdownOpen = false;
+                onDropdownClose();
+            })
+            .on('keydown', function(e) {
+                if (e.key === 'Enter' || e.key === 'Escape') {
+                    isDropdownOpen = false;
+                    onDropdownClose();
+                }
+            });
 
         loadTaskLists();
     });
