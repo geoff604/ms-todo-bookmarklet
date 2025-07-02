@@ -10,10 +10,72 @@
             showTaskLists(cachedData);
             $.get("backend.php?method=getTaskLists", function(freshData) {
                 if (JSON.stringify(cachedData) !== JSON.stringify(freshData)) {
-                    showTaskListsPreservingSelection(freshData);
+                    scheduleTaskListUpdate(freshData);
                 }
             }).fail(fnFail);
         });
+    }
+
+    // Variables to track user interaction with dropdown
+    var isUserInteracting = false;
+    var interactionTimer = null;
+    var pendingUpdate = null;
+
+    /**
+    * Schedule a task list update, but delay it if user is actively interacting
+    * @param {Array.<Object>} taskLists The task lists to show.
+    */
+    function scheduleTaskListUpdate(taskLists) {
+        pendingUpdate = taskLists;
+        
+        if (isUserInteracting) {
+            // User is actively interacting, wait until they're done
+            return;
+        }
+        
+        // User is not interacting, update immediately
+        showTaskListsPreservingSelection(taskLists);
+        pendingUpdate = null;
+    }
+
+    /**
+    * Execute any pending update after user interaction has stopped
+    */
+    function executePendingUpdate() {
+        if (pendingUpdate) {
+            showTaskListsPreservingSelection(pendingUpdate);
+            pendingUpdate = null;
+        }
+    }
+
+    /**
+    * Mark that user interaction has started
+    */
+    function startUserInteraction() {
+        isUserInteracting = true;
+        
+        // Clear any existing timer
+        if (interactionTimer) {
+            clearTimeout(interactionTimer);
+            interactionTimer = null;
+        }
+    }
+
+    /**
+    * Mark that user interaction has potentially ended
+    */
+    function endUserInteraction() {
+        // Clear any existing timer
+        if (interactionTimer) {
+            clearTimeout(interactionTimer);
+        }
+        
+        // Set a timer to mark interaction as ended after 500ms
+        interactionTimer = setTimeout(function() {
+            isUserInteracting = false;
+            interactionTimer = null;
+            executePendingUpdate();
+        }, 500);
     }
 
     /**
@@ -189,6 +251,44 @@
         // Listen for theme changes to update datepicker
         $('#theme-toggle').on('click', function() {
             setTimeout(updateDatepickerTheme, 10);
+        });
+
+        // Set up event listeners for dropdown interaction tracking
+        var tasklistSelect = $('#tasklist');
+        
+        // Track mouse down events
+        tasklistSelect.on('mousedown', function() {
+            startUserInteraction();
+        });
+        
+        // Track mouse up events
+        tasklistSelect.on('mouseup', function() {
+            endUserInteraction();
+        });
+        
+        // Track scroll events
+        tasklistSelect.on('scroll', function() {
+            startUserInteraction();
+            endUserInteraction(); // This will reset the timer
+        });
+        
+        // Track focus events (keyboard navigation)
+        tasklistSelect.on('focus', function() {
+            startUserInteraction();
+        });
+        
+        // Track blur events (when dropdown loses focus)
+        tasklistSelect.on('blur', function() {
+            endUserInteraction();
+        });
+        
+        // Track keydown events for keyboard navigation
+        tasklistSelect.on('keydown', function(e) {
+            // Arrow keys, Page Up/Down, Home, End
+            if (e.which >= 33 && e.which <= 40) {
+                startUserInteraction();
+                endUserInteraction(); // This will reset the timer
+            }
         });
 
         loadTaskLists();
