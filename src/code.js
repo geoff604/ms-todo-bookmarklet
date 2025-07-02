@@ -42,7 +42,7 @@
         showTaskLists(taskLists);
 
         if (selectedValue) {
-            $('#tasklist option[value=' + selectedValue + ']').prop('selected', true);
+            $('#tasklist').val(selectedValue);
         }
     }
 
