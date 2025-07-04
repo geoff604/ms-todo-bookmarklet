@@ -38,10 +38,12 @@
     */
     function showTaskListsPreservingSelection(taskLists) {
         var selectedValue = $('#tasklist').val();
+        var selectedItemText = $('#tasklist option:selected').text();
+        var shouldRestoreSelection = selectedValue && selectedItemText && selectedItemText !== "Tasks";
 
         showTaskLists(taskLists);
 
-        if (selectedValue) {
+        if (shouldRestoreSelection) {
             $('#tasklist').val(selectedValue);
         }
     }
