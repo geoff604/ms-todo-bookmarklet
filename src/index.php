@@ -1,11 +1,14 @@
 <!DOCTYPE html>
 <html>
 <head>
+<meta charset="UTF-8">
+<title>Tasks App</title>
 <link rel="stylesheet" href="https://ajax.googleapis.com/ajax/libs/jqueryui/1.14.1/themes/smoothness/jquery-ui.css">
 <link rel="stylesheet" href="fontawesome/css/fontawesome.min.css">
 <link rel="stylesheet" href="fontawesome/css/solid.min.css">
 
-<!-- Custom styles. -->
+<script src="https://alcdn.msauth.net/browser/2.37.1/js/msal-browser.min.js"></script>
+
 <style>
   :root {
     /* Light mode variables */
@@ -88,7 +91,8 @@
   }
 
   #task-title {
-    width: 450px;
+    flex-grow: 1;
+    min-width: 0; 
     padding: 8px 10px;
     border: 1px solid var(--border-color);
     border-radius: 4px;
@@ -197,7 +201,6 @@
     cursor: pointer;
   }
 
-  /* Standard tactile "mouse down" press effect */
   label.star:active:before {
     transform: scale(0.85);
   }
@@ -207,14 +210,11 @@
     text-shadow: none;
   }
 
-  /* Add subtle cross-hatch pattern when the star is checked */
   .dark-mode input.star:checked ~ label.star:before {
-    /* Thin (1px), subtle semi-transparent grey lines over the original yellow */
     background: 
       repeating-linear-gradient(45deg, rgba(0, 0, 0, 0.25) 0, rgba(0, 0, 0, 0.25) 1px, transparent 1px, transparent 5px),
       repeating-linear-gradient(-45deg, rgba(0, 0, 0, 0.25) 0, rgba(0, 0, 0, 0.25) 1px, transparent 1px, transparent 5px),
       var(--star-checked);
-
     -webkit-background-clip: text;
     background-clip: text;
     -webkit-text-fill-color: transparent;
@@ -222,13 +222,8 @@
     text-shadow: none;
   }
 
-  /* Maintain the pattern and add the focus glow when checked */
   .dark-mode input.star:focus-visible:checked ~ label.star:before {
-    /* Disable text-shadow to prevent it from blocking the patterned background */
     text-shadow: none;
-  
-    /* Use drop-shadow to recreate your blue focus glow. 
-       This wraps around the clipped text outline perfectly. */
     filter: drop-shadow(0px 0px var(--star-focus-shadow-width) var(--glow-color))
       drop-shadow(0px 0px var(--star-focus-shadow-width) var(--glow-color))
       drop-shadow(0px 0px var(--star-focus-shadow-width) var(--glow-color));
@@ -246,8 +241,8 @@
   }
 
   .inline-label-input {
-    display: inline-block;
-    margin-right: 10px;
+    display: flex;
+    width: 100%;
     margin-bottom: 8px;
     align-items: center;
   }
@@ -256,9 +251,18 @@
     font-weight: 500;
     color: var(--text-secondary);
     margin-right: 5px;
+    white-space: nowrap; 
+  }
+
+  /* Added specific spacing for the date label when it shares a row */
+  .date-label {
+    margin-left: 15px;
   }
 
   #task-date {
+    /* Prevent the date input from being squeezed by the growing title field */
+    width: 110px;
+    flex-shrink: 0;
     padding: 8px 10px;
     border: 1px solid var(--border-color);
     border-radius: 4px;
@@ -276,16 +280,16 @@
   }
 
   select::-webkit-scrollbar {
-    width: 40px; /* Adjust the width */
+    width: 40px;
   }
 
   select::-webkit-scrollbar-thumb {
-    background-color: var(--scrollbar-thumb); /* Color of the scrollbar thumb */
+    background-color: var(--scrollbar-thumb);
     border-radius: 6px;
   }
 
   select::-webkit-scrollbar-track {
-    background-color: var(--scrollbar-track); /* Track background color */
+    background-color: var(--scrollbar-track);
   }
 
   #theme-toggle {
@@ -312,7 +316,6 @@
     box-shadow: 0 0 0 2px var(--glow-shadow);
   }
 
-  /* jQuery UI datepicker overrides for dark mode */
   .dark-mode .ui-widget-content {
     background: var(--bg-secondary);
     color: var(--text-primary);
@@ -340,48 +343,84 @@
     background: var(--button-hover);
     color: white;
   }
+
+  #auth-bar {
+    position: absolute;
+    top: 12px;
+    left: 12px;
+    z-index: 100;
+  }
+  
+  .auth-btn {
+    padding: 5px 10px;
+    background-color: var(--button-bg);
+    color: white;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 13px;
+    font-weight: 500;
+  }
+  
+  .auth-btn:hover { background-color: var(--button-hover); }
+  
+  #app-content { 
+    display: none; 
+    flex-direction: column;
+    flex-grow: 1;
+    height: 100%;
+  }
 </style>
 </head>
 <body>
 <div id="outer">
+  <div id="auth-bar">
+    <button id="login-btn" class="auth-btn">Login with Microsoft</button>
+    <button id="logout-btn" class="auth-btn" style="display: none;">Logout</button>
+    <span id="user-greeting" style="margin-left: 10px; font-weight: bold;"></span>
+  </div>
+
   <button id="theme-toggle">🌓 Toggle Theme</button>
-  <div class="fixed-container">
-    <div id="message"></div>
-    <div class="inline-label-input">
-      <label for="tasklist">Select a task list: </label>
-      <select id="tasklist">
-        <option>Loading...</option>
-      </select>
+  
+  <div id="app-content">
+    <div class="fixed-container" style="margin-top: 40px;">
+      <div id="message"></div>
+      
+      <div class="inline-label-input">
+        <label for="tasklist">Select a task list: </label>
+        <select id="tasklist">
+          <option>Loading...</option>
+        </select>
+      </div>
+      
+      <div class="inline-label-input">
+        <input type="checkbox" class="star" name="favstar" id="favstar" value="1" />
+        <label title="Mark as important" for="favstar" class="star"></label>
+        
+        <label for="task-title">Title:</label>
+        <input type="text" maxlength="250" name="task-title" id="task-title" autofocus />
+        
+        <label for="task-date" class="date-label">Date:</label>
+        <input type="text" name="task-date" id="task-date" autocomplete="off" />
+      </div>
+      
     </div>
-    <br/>
-    <div class="inline-label-input">
-      <input type="checkbox" class="star" name="favstar" id="favstar" value="1" />
-      <label title="Mark as important" for="favstar" class="star"></label>
-      <label for="task-title">Title:</label>
-      <input type="text" maxlength="250" name="task-title" id="task-title" autofocus value="<? print(isSet($_GET['startingTitle']) ? htmlEntities($_GET['startingTitle'], ENT_QUOTES) : ''); ?>"/>
+    <div id="form-container">
+      <textarea name="task-note" id="task-note"></textarea>
     </div>
-    <div class="inline-label-input">
-      <label for="task-date">Date:</label>
-      <input type="text" name="task-date" id="task-date" />
+    <div class="fixed-container">
+      <form name="new-task" id="new-task"> 
+        <input type="submit" name="add" id="add-button" value="Add" />
+      </form>
     </div>
-  </div>
-  <div id="form-container">
-    <textarea name="task-note" id="task-note"><? print(isSet($_GET['startingNote']) ? htmlEntities($_GET['startingNote'], ENT_QUOTES) : ''); ?></textarea>
-  </div>
-  <div class="fixed-container">
-    <form name="new-task" id="new-task"> 
-      <input type="submit" name="add" id="add-button" value="Add" />
-    </form>
   </div>
 </div>
 
-<!-- Load the jQuery and jQuery UI libraries. -->
 <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
 <script src="https://ajax.googleapis.com/ajax/libs/jqueryui/1.14.1/jquery-ui.min.js"></script>
 
-<!-- Custom client-side JavaScript code. -->
 <script src="code.js"></script>
-<!-- Theme management JavaScript -->
+
 <script>
   // Theme management
   function setTheme(theme) {
