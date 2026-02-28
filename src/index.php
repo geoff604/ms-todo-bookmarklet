@@ -187,12 +187,19 @@
     margin: 5px;
     content: "\f005";
     display: inline-block;
-    font-size: 1.2em;
+    font-size: 1.3em;
     text-shadow: 0px 0px 1px var(--star-shadow), 0px 0px 1px var(--star-shadow), 0px 0px 1px var(--star-shadow), 0px 0px 1px var(--star-shadow), 0px 0px 1px var(--star-shadow);
     color: white;  
     -webkit-user-select: none;
     -moz-user-select: none;
     user-select: none;
+	transition: transform 0.1s ease-in-out;
+    cursor: pointer;
+  }
+
+  /* Standard tactile "mouse down" press effect */
+  label.star:active:before {
+    transform: scale(0.85);
   }
 
   input.star:checked ~ label.star:before {
@@ -200,7 +207,34 @@
     text-shadow: none;
   }
 
-  input.star:focus ~ label.star:before {
+  /* Add subtle cross-hatch pattern when the star is checked */
+  .dark-mode input.star:checked ~ label.star:before {
+    /* Thin (1px), subtle semi-transparent grey lines over the original yellow */
+    background: 
+      repeating-linear-gradient(45deg, rgba(0, 0, 0, 0.25) 0, rgba(0, 0, 0, 0.25) 1px, transparent 1px, transparent 5px),
+      repeating-linear-gradient(-45deg, rgba(0, 0, 0, 0.25) 0, rgba(0, 0, 0, 0.25) 1px, transparent 1px, transparent 5px),
+      var(--star-checked);
+
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+    color: transparent; 
+    text-shadow: none;
+  }
+
+  /* Maintain the pattern and add the focus glow when checked */
+  .dark-mode input.star:focus-visible:checked ~ label.star:before {
+    /* Disable text-shadow to prevent it from blocking the patterned background */
+    text-shadow: none;
+  
+    /* Use drop-shadow to recreate your blue focus glow. 
+       This wraps around the clipped text outline perfectly. */
+    filter: drop-shadow(0px 0px var(--star-focus-shadow-width) var(--glow-color))
+      drop-shadow(0px 0px var(--star-focus-shadow-width) var(--glow-color))
+      drop-shadow(0px 0px var(--star-focus-shadow-width) var(--glow-color));
+  }
+
+  input.star:focus-visible ~ label.star:before {
     border-color: var(--glow-color);
     outline: none;
     text-shadow: 
