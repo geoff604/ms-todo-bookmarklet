@@ -1,84 +1,92 @@
 # ms-todo-bookmarklet
 A browser bookmarklet for Microsoft To Do https://todo.microsoft.com/ that allows adding tasks to your todo list from any website.
 
-**Warning - Use at your own risk - script is not secure, unless you know what you're doing!**
-- This script should **not** be simply uploaded to a web server with public access, as it will allow anyone to access 
-your Office 365 account.
-- For setting up this script securely, please see the note about Apache Basic authentication and HTTPS below.
+# Microsoft To-Do Web App
 
-## What is a Bookmarklet? 
-From wikipedia:
-> A bookmarklet is a bookmark stored in a web browser that contains JavaScript commands that add new features to the browser. Bookmarklets are unobtrusive JavaScripts stored as the URL of a bookmark in a web browser or as a hyperlink on a web page. Bookmarklets are usually JavaScript programs. Regardless of whether bookmarklet utilities are stored as bookmarks or hyperlinks, they add one-click functions to a browser or web page. When clicked, a bookmarklet performs one of a wide variety of operations, such as running a search query or extracting data from a table. For example, clicking on a bookmarklet after selecting text on a webpage could run an Internet search on the selected text and display a search engine results page.
+A lightweight, secure, Single Page Application (SPA) for adding tasks to Microsoft To Do directly from your browser. 
 
-See: https://en.wikipedia.org/wiki/Bookmarklet
+This app allows you to quickly add tasks, pre-fill task details via URL parameters (great for bookmarklets), and manage your lists. 
+It is built using HTML, CSS, JavaScript, and the Microsoft Authentication Library (MSAL.js).
 
-# How it works:
-- You'll need to set up the Microsoft To Do Bookmarklet in your browser bookmark toolbar, and configure the backend
-PHP script on your server
-- After it's set up, you can visit any web page, such as viewing a Gmail message, and then simply click the 
-bookmarklet to open up a popup window for entering task details.
-- In the popup window, the title of the webpage you are viewing will be populated into the title of the task, 
-and the title and URL of the page will be populated into the notes section of the task.
-- You are free to modify the title, notes, and set a date and choose your task list to add the task list.
-- Click the Star icon next to the task Title to make the task marked Important when it is added.
-- Then click the Add button and the task will be automatically added into your Microsoft To Do task list that you
-selected.
+## 🚀 Key Features
+* **Zero Backend Required:** 100% client-side authentication. No server-side secrets or databases to maintain.
+* **Highly Secure:** Uses the modern OAuth 2.0 Authorization Code Flow with PKCE via MSAL.js. Tokens are stored securely in your browser.
+* **Lightning Fast:** Caches your task lists in local browser storage so the app loads instantly on return visits.
+* **Bookmarklet Ready:** Accepts `startingTitle` and `startingNote` URL parameters to easily add tasks from any web page.
+* **Dark/Light Mode:** Includes a theme toggle that remembers your preference.
 
-# Set Up and Configuration
-## Backend Support (Required)
-The Microsoft Todo Bookmarklet works with the provided PHP script in this Github repo, that will take care of actually
-adding the task to your todo list. You will need to host this PHP script yourself on your web server to make it work. 
+---
 
-If you are not able to do this, I could potentially host this for people on my server, but currently the script is
-not sophisticated enough for a multi user scenario. Therefore, at the current time, to use this Bookmarklet requires
-a working knowledge of how to set up and modify PHP scripts on a web server such as Apache.
+## 🛠️ How to Set Up Your Own Instance
 
-PHP is a backend (server side) scripting language that is very common and still quite popular online.
-For more details please see: https://www.php.net/
+Because this is a pure SPA, you do not need PHP or a complex web server. You just need to register the application with Microsoft to get a Client ID, and then host the HTML/JS files anywhere that serves static web pages.
 
-## Prerequisite:
-- I'd only recommend attempting setting up this script if you have basic knowledge of PHP programming as well as
-basic Apache web server config.
+### Step 1: Get a Free Microsoft Azure Account
+To connect to the Microsoft Graph API, you need an App Registration in the Azure Portal.
+1. Go to [portal.azure.com](https://portal.azure.com/).
+2. Sign in with your standard Microsoft account (the same one you use for To-Do). 
+3. *Note: You do not need a paid Azure subscription to register an app for personal use.*
 
-## Microsoft Account
-You'll need a Microsoft account. You can create a free Microsoft account or you can use one provided by your
-school or employer.
+### Step 2: Create an App Registration
+1. In the Azure Portal search bar at the top, type **Microsoft Entra ID** (formerly Azure Active Directory) and select it.
+2. In the left-hand menu, scroll down and click on **App registrations**.
+3. Click the **+ New registration** button at the top.
+4. **Name:** Give your app a name (e.g., "My To-Do SPA").
+5. **Supported account types:** Select the 3rd option: *"Accounts in any organizational directory and personal Microsoft accounts (e.g. Skype, Xbox)"*.
+6. **Redirect URI:** * In the dropdown, select **Single-page application (SPA)**.
+   * Enter the exact URL where you will host this app (e.g., `https://your-domain.com/index.html`). 
+   * *Tip for local testing: You can enter `http://localhost:8000/index.html` for now and add your live URL later.*
+7. Click **Register**.
 
-> How to create a new Microsoft account
-> Go to account.microsoft.com, select Sign in, and then choose Create one!
-> If you'd rather create a new email address, choose Get a new email address, choose Next, and then follow the instructions.
- 
-## Azure Active Directory Console
-Check that you can log in to the Azure Active Directory console using your Microsoft account.
-This is required to set up the API key and app permissions for this script.
+### Step 3: Get Your Client ID
+1. Once registered, you will be taken to the app's **Overview** page.
+2. Look for the **Application (client) ID**. It is a long string of numbers and letters.
+3. **Copy this Client ID.** 4. Open the `code.js` file in your text editor.
+5. Replace the placeholder `"sample-123-234-1231-31231-231"` inside the `msalConfig` object with your actual Client ID.
 
-The URL for Azure Active Directory Console is: http://aad.portal.azure.com
+### Step 4: Configure API Permissions
+1. On your App Registration page in Azure, click **API permissions** in the left menu.
+2. Click **+ Add a permission**.
+3. Select **Microsoft Graph**, then choose **Delegated permissions**.
+4. Search for and check the following permissions:
+   * `Tasks.ReadWrite` (Allows the app to read and add tasks)
+   * `User.Read` (Allows the app to read your basic profile to say "Hello, [Name]")
+5. Click **Add permissions** at the bottom.
 
-## Creating Your App in Azure Console
-You'll need to create an App in Azure Console and give it the Microsoft Graph API permissions
-stated in the Scopes section of backend.php, and set up a client secret and redirect URL.
-Then, update backend.php with your app id and client secret, and redirect URL.
+---
 
-## Setting Up The Backend PHP Script
-You'll need to modify backend.php to fill in the following placeholder settings:
+## 🌐 Hosting the App
 
-    // Update the strings below for your app
-    $settings["client_id"] = "sample-123-234-1231-31231-231";
-    $settings["client_secret"] = "sample-123-234-1231-31231-231";
+Because this app consists solely of static files (`index.html` and `code.js`), you can host it almost anywhere for free.
 
-    // Set this string to the https url of backend.php on your server. It should below
-    // the same as the redirect URL configured in Azure Active Directory console
-    $settings["redirect_uri"] = "https://mydomain.com/path/to/backend.php";
+**Option A: GitHub Pages (Recommended & Free)**
+1. Create a new repository on GitHub and upload the project files.
+2. Go to the repository **Settings** -> **Pages**.
+3. Under "Source", select the `main` branch and click Save.
+4. In a few minutes, your app will be live. *Don't forget to add this new GitHub Pages URL to your Azure App Registration's Redirect URIs!*
 
-### Using the Script Securely - Apache .htaccess Basic Authentication and HTTPS support
-This script should **not** be simply uploaded to a web server with public access, as it will allow anyone to access 
-your Office 365 account.
+**Option B: Local Testing**
+You cannot simply double-click `index.html` to open it as a `file://` because modern browser security blocks API authentication from local files. You must serve it over a local web server.
+* **If you have Python installed:** Open your terminal in the project folder and run `python -m http.server 8000`. Then visit `http://localhost:8000` in your browser.
+* **If you use VS Code:** Install the "Live Server" extension and click "Go Live" at the bottom right of the screen.
 
-I recommend setting up a .htaccess file on your server so the directory is protected
-by Basic Authentication (it should not be available publicly on your server as the script
-is most likely NOT secure). 
+---
 
-Also, you should use HTTPS for accessing the script.
+## 🔖 Using the Bookmarklet
+
+You can use a browser bookmarklet to highlight text on any webpage and instantly send it to your Tasks app.
+
+Create a new bookmark in your browser, name it "Add Task", and paste the following code into the **URL** field. *(Make sure to replace `https://your-hosted-url.com/index.html` with your actual live app URL).*
+
+```javascript
+javascript:(function(){
+    var title = document.title;
+    var note = window.getSelection().toString() || window.location.href;
+    var appUrl = "[https://your-hosted-url.com/index.html](https://your-hosted-url.com/index.html)";
+    var fullUrl = appUrl + "?startingTitle=" + encodeURIComponent(title) + "&startingNote=" + encodeURIComponent(note);
+    window.open(fullUrl, '_blank', 'width=500,height=600');
+})();
+```
 
 ## Setting Up The Bookmarklet In Your Browser
 You will need to add a bookmarklet to your browser bar, by opening the file
@@ -89,7 +97,7 @@ the script in a popup window.
 ### How to Modify the Bookmarklet Before Using It
 You'll see in bookmarklet-improved.txt that there is an example URL such as:
 https://gpeters.com/tasks/ms/index.php
-You'll need to update that URL in the bookmarklet to point to the location of the index.php of this project
+You'll need to update that URL in the bookmarklet to point to the location of the index.html of this project
 on your own server.
 
 You will also see my email address contained in the bookmarklet. The purpose of this is to
