@@ -88,7 +88,7 @@ Create a new bookmark in your browser, name it "Add Task", and paste the followi
 javascript:(function(){
     var title = document.title;
     var note = window.getSelection().toString() || window.location.href;
-    var appUrl = "[https://your-hosted-url.com/index.html](https://your-hosted-url.com/index.html)";
+    var appUrl = "https://your-hosted-url.com/index.html";
     var fullUrl = appUrl + "?startingTitle=" + encodeURIComponent(title) + "&startingNote=" + encodeURIComponent(note);
     window.open(fullUrl, '_blank', 'width=500,height=600');
 })();
