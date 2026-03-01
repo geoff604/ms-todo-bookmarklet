@@ -123,6 +123,11 @@ However, if you have any questions, feel free to email me at geoff.peters@gmail.
 # License
 This script is made available via the MIT License.
 
+This is with exception of the icons and css in the fontawesome folder which follow the license below:
+* Font Awesome Free 6.2.0 by @fontawesome - https://fontawesome.com
+* License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License)
+* Copyright 2022 Fonticons, Inc.
+
 # My other To-Do and Google Tasks Bookmarklets
 For similar Bookmarklets that work for Google Tasks instead, please check out:
 - https://github.com/geoff604/google-tasks-bookmarklet-php (for a PHP version)
