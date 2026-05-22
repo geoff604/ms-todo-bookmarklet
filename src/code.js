@@ -60,7 +60,10 @@ function handleSignedInUser(account) {
     
     // Explicitly set to flex instead of using .show() to preserve textarea flex-grow
     $('#app-content').css('display', 'flex'); 
-    
+
+    // Focus on task list so it can accept search typing to select item when it is not dropped down
+    $('#tasklist').focus();
+
     loadTaskLists();
 }
 
