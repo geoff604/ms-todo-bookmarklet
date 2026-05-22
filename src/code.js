@@ -343,10 +343,62 @@ function prefillFromUrl() {
     }
 }
 
+/**
+ * Enables custom type-to-search functionality for the task list dropdown,
+ * ignoring emojis and case, to override default browser select behavior.
+ */
+function setupDropdownSearch() {
+    let searchBuffer = "";
+    let searchTimeout = null;
+
+    $('#tasklist').on('keydown', function(e) {
+        // Allow default browser behavior for standard navigation keys
+        if (["ArrowDown", "ArrowUp", "Enter", "Escape", "Tab"].includes(e.key)) {
+            return;
+        }
+
+        // Ignore modifier key combinations or non-character keys
+        if (e.ctrlKey || e.altKey || e.metaKey || e.key.length !== 1) {
+            return;
+        }
+
+        // Prevent the browser's default exact-match jump behavior
+        e.preventDefault();
+
+        // Add the typed character to our buffer
+        searchBuffer += e.key.toLowerCase();
+
+        // Reset the buffer after 800ms of inactivity
+        clearTimeout(searchTimeout);
+        searchTimeout = setTimeout(() => {
+            searchBuffer = "";
+        }, 800);
+
+        // Find the first option that matches the buffer (ignoring emojis)
+        const options = $(this).find('option');
+        for (let i = 0; i < options.length; i++) {
+            const optionText = $(options[i]).text();
+            
+            // Utilize the existing emoji-stripping function and format for comparison
+            const cleanText = removeEmojiForSort(optionText).trim().toLowerCase();
+
+            if (cleanText.startsWith(searchBuffer)) {
+                // Update the dropdown value to the matched option
+                $(this).val($(options[i]).val());
+                
+                // Trigger a change event in case listeners are bound to this dropdown later
+                $(this).trigger('change'); 
+                break;
+            }
+        }
+    });
+}
+
 // When the page loads.
 $(function() {
     prefillFromUrl();
     initializeAuth();
+    setupDropdownSearch(); // Initialize custom dropdown search
 
     $('#new-task').bind('submit', onNewTaskFormSubmit);
 
