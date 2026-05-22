@@ -354,7 +354,19 @@ function setupDropdownSearch() {
     let searchBuffer = "";
     let searchTimeout = null;
 
+    // Clear the search buffer completely whenever the dropdown gains focus
+    $('#tasklist').on('focus', function() {
+        searchBuffer = "";
+    });
+
     $('#tasklist').on('keydown', function(e) {
+        // Handle Backspace to instantly clear the search buffer
+        if (e.key === "Backspace") {
+            searchBuffer = "";
+            e.preventDefault(); // Prevent accidental "page back" navigation
+            return;
+        }
+
         // Allow default browser behavior for standard navigation keys
         if (["ArrowDown", "ArrowUp", "Enter", "Escape", "Tab"].includes(e.key)) {
             return;
@@ -371,11 +383,11 @@ function setupDropdownSearch() {
         // Add the typed character to our buffer
         searchBuffer += e.key.toLowerCase();
 
-        // Reset the buffer after 800ms of inactivity
+        // Reset the buffer after 10 seconds (10000ms) of inactivity
         clearTimeout(searchTimeout);
         searchTimeout = setTimeout(() => {
             searchBuffer = "";
-        }, 800);
+        }, 10000);
 
         // Find the first option that matches the buffer (ignoring emojis)
         const options = $(this).find('option');
