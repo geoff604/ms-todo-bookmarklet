@@ -26,7 +26,7 @@
     --star-color: #C8C8C8;
     --star-checked: #FFC107;
     --star-shadow: #000;
-	--star-focus-shadow-width: 1px;
+    --star-focus-shadow-width: 1px;
     --scrollbar-thumb: rgba(66, 133, 244, 0.4);
     --scrollbar-track: rgba(77, 144, 254, 0.05);
   }
@@ -47,7 +47,7 @@
     --star-color: #333;
     --star-checked: #FFC107;
     --star-shadow: #000;
-	--star-focus-shadow-width: 2px;
+    --star-focus-shadow-width: 2px;
     --scrollbar-thumb: rgba(66, 133, 244, 0.6);
     --scrollbar-track: rgba(77, 144, 254, 0.1);
   }
@@ -197,7 +197,7 @@
     -webkit-user-select: none;
     -moz-user-select: none;
     user-select: none;
-	transition: transform 0.1s ease-in-out;
+    transition: transform 0.1s ease-in-out;
     cursor: pointer;
   }
 
@@ -369,6 +369,61 @@
     flex-direction: column;
     flex-grow: 1;
     height: 100%;
+  }
+
+  /* --- Smart Dropdown Ghost UI Styling --- */
+  .smart-search-wrapper {
+      position: relative;
+      display: inline-block;
+  }
+
+  #search-buffer-display {
+      position: absolute;
+      bottom: 100%; 
+      left: 0;
+      background: var(--button-bg);
+      color: white;
+      padding: 2px 8px;
+      border-radius: 4px 4px 0 0;
+      font-size: 0.85em;
+      font-weight: bold;
+      display: none;
+      z-index: 10;
+  }
+
+  #smart-search-results {
+      position: absolute;
+      top: 100%; 
+      left: 0;
+      min-width: 200px; /* Ensure it's wide enough even if select is small */
+      background: var(--bg-secondary);
+      border: 1px solid var(--border-color);
+      border-radius: 0 0 4px 4px;
+      box-shadow: 0 4px 6px var(--shadow-color);
+      list-style: none;
+      margin: 0;
+      padding: 0;
+      display: none;
+      z-index: 10;
+      max-height: 250px;
+      overflow-y: auto;
+  }
+
+  #smart-search-results li {
+      padding: 8px 12px;
+      cursor: pointer;
+      border-bottom: 1px solid var(--border-color);
+      color: var(--text-primary);
+  }
+
+  #smart-search-results li:last-child {
+      border-bottom: none;
+  }
+
+  #smart-search-results li.highlighted,
+  #smart-search-results li:hover {
+      background-color: var(--button-bg);
+      color: white;
   }
 </style>
 </head>

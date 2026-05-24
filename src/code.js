@@ -347,73 +347,275 @@ function prefillFromUrl() {
 }
 
 /**
- * Enables custom type-to-search functionality for the task list dropdown,
- * ignoring emojis and case, to override default browser select behavior.
+ * Smart Dropdown Module
+ * Encapsulates the state and logic for the custom fuzzy-search UI.
  */
-function setupDropdownSearch() {
+const SmartDropdown = (function() {
+    // --- State Variables ---
     let searchBuffer = "";
     let searchTimeout = null;
+    let highlightedIndex = -1;
+    let currentResults = [];
+    
+    // DOM Element References
+    let $select, $wrapper, $bufferDisplay, $resultsList;
 
-    // Clear the search buffer completely whenever the dropdown gains focus
-    $('#tasklist').on('focus', function() {
-        searchBuffer = "";
-    });
+    // --- Initialization & UI Setup ---
+    function init() {
+        $select = $('#tasklist');
+        if ($select.length === 0) return;
 
-    $('#tasklist').on('keydown', function(e) {
-        // Handle Backspace to instantly clear the search buffer
+        injectGhostUI();
+        bindEvents();
+    }
+
+    function injectGhostUI() {
+        // Wrap the native select to anchor the absolute positioned ghost UI
+        $select.wrap('<div class="smart-search-wrapper"></div>');
+        $wrapper = $select.parent();
+
+        // Inject Buffer Display (Above)
+        $bufferDisplay = $('<div id="search-buffer-display"></div>');
+        $wrapper.prepend($bufferDisplay);
+
+        // Inject Results Dropdown (Below)
+        $resultsList = $('<ul id="smart-search-results"></ul>');
+        $wrapper.append($resultsList);
+    }
+
+    function bindEvents() {
+        $select.on('focus', clearSearch);
+        $select.on('blur', handleBlur);
+        $select.on('keydown', handleKeyDown);
+
+        // Handle mouse clicks on custom dropdown items
+        $resultsList.on('mousedown', 'li', function(e) {
+            e.preventDefault(); // Prevent blur on select
+            selectOption($(this).data('value'));
+        });
+    }
+
+    // --- Event Handlers ---
+    function handleKeyDown(e) {
+        const isNavigationKey = ["ArrowDown", "ArrowUp", "Enter", "Escape"].includes(e.key);
+
+        if (isNavigationKey) {
+            handleNavigation(e);
+            return;
+        }
+
         if (e.key === "Backspace") {
-            searchBuffer = "";
-            e.preventDefault(); // Prevent accidental "page back" navigation
+            e.preventDefault(); // Prevent page back
+            if (searchBuffer.length > 0) {
+                searchBuffer = searchBuffer.slice(0, -1);
+                updateUI();
+            }
             return;
         }
 
-        // Allow default browser behavior for standard navigation keys
-        if (["ArrowDown", "ArrowUp", "Enter", "Escape", "Tab"].includes(e.key)) {
-            return;
-        }
+        // Ignore modifier key combinations or non-character keys (e.g., Tab, Shift)
+        if (e.ctrlKey || e.altKey || e.metaKey || e.key.length !== 1) return;
 
-        // Ignore modifier key combinations or non-character keys
-        if (e.ctrlKey || e.altKey || e.metaKey || e.key.length !== 1) {
-            return;
-        }
-
-        // Prevent the browser's default exact-match jump behavior
+        // Prevent native exact-match jump
         e.preventDefault();
 
-        // Add the typed character to our buffer
         searchBuffer += e.key.toLowerCase();
+        resetInactivityTimeout();
+        updateUI();
+    }
 
-        // Reset the buffer after 10 seconds (10000ms) of inactivity
+    function handleNavigation(e) {
+        if (!searchBuffer) return; // Let native select handle navigation if no search is active
+
+        e.preventDefault(); // Stop native dropdown from changing values
+
+        if (e.key === "Escape") {
+            clearSearch();
+            return;
+        }
+
+        if (e.key === "Enter") {
+            if (highlightedIndex >= 0 && currentResults[highlightedIndex]) {
+                selectOption(currentResults[highlightedIndex].value);
+            }
+            return;
+        }
+
+        if (e.key === "ArrowDown") {
+            highlightedIndex = Math.min(highlightedIndex + 1, currentResults.length - 1);
+            renderList();
+        }
+
+        if (e.key === "ArrowUp") {
+            highlightedIndex = Math.max(highlightedIndex - 1, 0);
+            renderList();
+        }
+    }
+
+    function handleBlur() {
+        // Slight delay to allow click events on the results list to fire first
+        setTimeout(clearSearch, 150);
+    }
+
+    // --- Core Logic & Rendering ---
+    function resetInactivityTimeout() {
         clearTimeout(searchTimeout);
-        searchTimeout = setTimeout(() => {
-            searchBuffer = "";
-        }, 10000);
+        searchTimeout = setTimeout(clearSearch, 10000); // 10 seconds
+    }
 
-        // Find the first option that matches the buffer (ignoring emojis)
-        const options = $(this).find('option');
-        for (let i = 0; i < options.length; i++) {
-            const optionText = $(options[i]).text();
-            
-            // Utilize the existing emoji-stripping function and format for comparison
-            const cleanText = removeEmojiForSort(optionText).trim().toLowerCase();
+    function clearSearch() {
+        searchBuffer = "";
+        highlightedIndex = -1;
+        currentResults = [];
+        $bufferDisplay.hide().text("");
+        $resultsList.hide().empty();
+    }
 
-            if (cleanText.startsWith(searchBuffer)) {
-                // Update the dropdown value to the matched option
-                $(this).val($(options[i]).val());
+    function selectOption(value) {
+        $select.val(value).trigger('change');
+        clearSearch();
+        $select.blur(); // Remove focus to fully reset the interaction
+    }
+
+    function updateUI() {
+        if (!searchBuffer) {
+            clearSearch();
+            return;
+        }
+
+        // 1. Update Buffer Text
+        $bufferDisplay.text(`Searching: "${searchBuffer}"`).show();
+
+        // 2. Rank and Filter Options
+        currentResults = rankOptions(searchBuffer);
+        
+        // 3. Reset highlight to top match
+        highlightedIndex = currentResults.length > 0 ? 0 : -1;
+
+        // 4. Render Dropdown
+        renderList();
+    }
+
+    function renderList() {
+        $resultsList.empty();
+
+        if (currentResults.length === 0) {
+            $resultsList.append('<li><em style="color:#999;">No matches found</em></li>');
+        } else {
+            currentResults.forEach((result, index) => {
+                const $li = $('<li></li>')
+                    .text(result.originalText)
+                    .data('value', result.value);
                 
-                // Trigger a change event in case listeners are bound to this dropdown later
-                $(this).trigger('change'); 
-                break;
+                if (index === highlightedIndex) {
+                    $li.addClass('highlighted');
+                }
+                $resultsList.append($li);
+            });
+        }
+
+        $resultsList.show();
+    }
+
+    // --- Ranking & Algorithm ---
+    function rankOptions(buffer) {
+        const options = [];
+        
+        $select.find('option').each(function() {
+            const originalText = $(this).text();
+            // removeEmojiForSort is defined globally above in code.js
+            const cleanText = removeEmojiForSort(originalText).trim().toLowerCase();
+            const value = $(this).val();
+
+            const score = calculateScore(buffer, cleanText);
+            
+            if (score > 0) {
+                options.push({ originalText, cleanText, value, score });
+            }
+        });
+
+        // Sort descending by score, then slice top 10
+        return options
+            .sort((a, b) => b.score - a.score)
+            .slice(0, 10);
+    }
+
+    function calculateScore(buffer, target) {
+        const bufLen = buffer.length;
+        const targetLen = target.length;
+
+        // Tier 1: Exact & Prefix
+        if (buffer === target) return 1000;
+        if (target.startsWith(buffer)) return 900 - targetLen;
+
+        // Tier 2: Word Boundary
+        const words = target.split(/\s+/);
+        if (words.some(w => w.startsWith(buffer))) return 700 - targetLen;
+
+        // Tier 2: Substring Match
+        const index = target.indexOf(buffer);
+        if (index !== -1) return 600 - index;
+
+        // Tier 3: Fuzzy Logic (Only trigger if buffer is >= 3 chars to avoid noise)
+        if (bufLen >= 3) {
+            // Fuzzy Prefix
+            const prefixSlice = target.substring(0, bufLen);
+            const prefixDist = getLevenshteinDistance(buffer, prefixSlice);
+            if (prefixDist <= 2) return 400 - (prefixDist * 50);
+
+            // Fuzzy Substring (Sliding Window)
+            let minSubDist = Infinity;
+            for (let i = 0; i <= targetLen - bufLen; i++) {
+                const windowStr = target.substring(i, i + bufLen);
+                const dist = getLevenshteinDistance(buffer, windowStr);
+                if (dist < minSubDist) minSubDist = dist;
+            }
+            if (minSubDist <= 2) return 200 - (minSubDist * 50);
+        }
+
+        // Tier 4: No Match
+        return 0;
+    }
+
+    /**
+     * Standard Dynamic Programming Levenshtein Distance Algorithm
+     */
+    function getLevenshteinDistance(a, b) {
+        const matrix = Array.from({ length: a.length + 1 }, () => []);
+
+        for (let i = 0; i <= a.length; i++) matrix[i][0] = i;
+        for (let j = 0; j <= b.length; j++) matrix[0][j] = j;
+
+        for (let i = 1; i <= a.length; i++) {
+            for (let j = 1; j <= b.length; j++) {
+                if (a[i - 1] === b[j - 1]) {
+                    matrix[i][j] = matrix[i - 1][j - 1];
+                } else {
+                    matrix[i][j] = Math.min(
+                        matrix[i - 1][j - 1] + 1, // Substitution
+                        matrix[i][j - 1] + 1,     // Insertion
+                        matrix[i - 1][j] + 1      // Deletion
+                    );
+                }
             }
         }
-    });
-}
+        return matrix[a.length][b.length];
+    }
+
+    // Expose only the initialization method publicly
+    return {
+        init: init
+    };
+
+})();
 
 // When the page loads.
 $(function() {
     prefillFromUrl();
     initializeAuth();
-    setupDropdownSearch(); // Initialize custom dropdown search
+
+    // Initialize custom smart dropdown search UI
+    SmartDropdown.init(); 
 
     $('#new-task').bind('submit', onNewTaskFormSubmit);
 
