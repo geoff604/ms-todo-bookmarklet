@@ -3,9 +3,9 @@ A browser bookmarklet for Microsoft To Do https://todo.microsoft.com/ that allow
 
 # Microsoft To-Do Web App
 
-A lightweight, secure, Single Page Application (SPA) for adding tasks to Microsoft To Do directly from your browser. 
+A lightweight, secure, Single Page Application (SPA) for adding tasks to Microsoft To Do directly from your browser.
 
-This app allows you to quickly add tasks, pre-fill task details via URL parameters (great for bookmarklets), and manage your lists. 
+This app allows you to quickly add tasks, pre-fill task details via URL parameters (great for bookmarklets), and manage your lists.
 It is built using HTML, CSS, JavaScript, and the Microsoft Authentication Library (MSAL.js).
 
 ## 🚀 Key Features
@@ -13,7 +13,21 @@ It is built using HTML, CSS, JavaScript, and the Microsoft Authentication Librar
 * **Highly Secure:** Uses the modern OAuth 2.0 Authorization Code Flow with PKCE via MSAL.js. Tokens are stored securely in your browser.
 * **Lightning Fast:** Caches your task lists in local browser storage so the app loads instantly on return visits.
 * **Bookmarklet Ready:** Accepts `startingTitle` and `startingNote` URL parameters to easily add tasks from any web page.
+* **Smart Fuzzy Search:** Type any part of a task list name to instantly filter and navigate the dropdown — no need to open it first. Supports emoji-aware matching, keyboard navigation, and auto-scrolling to the best match.
 * **Dark/Light Mode:** Includes a theme toggle that remembers your preference.
+
+---
+
+## 🔍 Smart Task List Search
+
+After logging in, the task list dropdown supports a powerful type-to-search feature:
+
+* **Just start typing** — the dropdown focuses automatically on load, so you can search immediately without clicking anything.
+* **Fuzzy matching** — finds lists even with minor typos, using a tiered scoring system: exact match → prefix → word boundary → substring → fuzzy (Levenshtein distance).
+* **Emoji-aware** — leading emojis in list names are ignored during matching, so typing `work` finds `💼 Work` as expected.
+* **Keyboard navigation** — use `↑`/`↓` to move through results, `Enter` to select, `Escape` or `Backspace` to clear the search.
+* **Auto-scroll** — the highlighted result is always kept in view within the dropdown.
+* **Auto-reset** — the search buffer clears automatically after 2 minutes of inactivity, or immediately when the dropdown loses focus.
 
 ---
 
@@ -24,7 +38,7 @@ Because this is a pure SPA, you do not need PHP or a complex web server. You jus
 ### Step 1: Get a Free Microsoft Azure Account
 To connect to the Microsoft Graph API, you need an App Registration in the Azure Portal.
 1. Go to [portal.azure.com](https://portal.azure.com/).
-2. Sign in with your standard Microsoft account (the same one you use for To-Do). 
+2. Sign in with your standard Microsoft account (the same one you use for To-Do).
 3. *Note: You do not need a paid Azure subscription to register an app for personal use.*
 
 ### Step 2: Create an App Registration
@@ -33,15 +47,17 @@ To connect to the Microsoft Graph API, you need an App Registration in the Azure
 3. Click the **+ New registration** button at the top.
 4. **Name:** Give your app a name (e.g., "My To-Do SPA").
 5. **Supported account types:** Select the 3rd option: *"Accounts in any organizational directory and personal Microsoft accounts (e.g. Skype, Xbox)"*.
-6. **Redirect URI:** * In the dropdown, select **Single-page application (SPA)**.
-   * Enter the exact URL where you will host this app (e.g., `https://your-domain.com/index.html`). 
+6. **Redirect URI:**
+   * In the dropdown, select **Single-page application (SPA)**.
+   * Enter the exact URL where you will host this app (e.g., `https://your-domain.com/index.html`).
    * *Tip for local testing: You can enter `http://localhost:8000/index.html` for now and add your live URL later.*
 7. Click **Register**.
 
 ### Step 3: Get Your Client ID
 1. Once registered, you will be taken to the app's **Overview** page.
 2. Look for the **Application (client) ID**. It is a long string of numbers and letters.
-3. **Copy this Client ID.** 4. Open the `code.js` file in your text editor.
+3. **Copy this Client ID.**
+4. Open the `code.js` file in your text editor.
 5. Replace the placeholder `"sample-123-234-1231-31231-231"` inside the `msalConfig` object with your actual Client ID.
 
 ### Step 4: Configure API Permissions
@@ -72,8 +88,8 @@ You cannot simply double-click `index.html` to open it as a `file://` because mo
 
 ---
 
-## What is a Bookmarklet? 
-From wikipedia:
+## What is a Bookmarklet?
+From Wikipedia:
 > A bookmarklet is a bookmark stored in a web browser that contains JavaScript commands that add new features to the browser. Bookmarklets are unobtrusive JavaScripts stored as the URL of a bookmark in a web browser or as a hyperlink on a web page. Bookmarklets are usually JavaScript programs. Regardless of whether bookmarklet utilities are stored as bookmarks or hyperlinks, they add one-click functions to a browser or web page. When clicked, a bookmarklet performs one of a wide variety of operations, such as running a search query or extracting data from a table. For example, clicking on a bookmarklet after selecting text on a webpage could run an Internet search on the selected text and display a search engine results page.
 
 See: https://en.wikipedia.org/wiki/Bookmarklet
@@ -96,24 +112,23 @@ javascript:(function(){
 
 ## Setting Up The Bookmarklet In Your Browser
 You will need to add a bookmarklet to your browser bar, by opening the file
-bookmarklet-improved.txt, modifying the script as suggested below, and then adding a
+`bookmarklet-improved.txt`, modifying the script as suggested below, and then adding a
 bookmark in your browser with the contents of the file. Clicking on the bookmarklet will open
 the script in a popup window.
 
 ### How to Modify the Bookmarklet Before Using It
-You'll see in bookmarklet-improved.txt that there is an example URL such as:
-https://gpeters.com/tasks/ms/index.php
-You'll need to update that URL in the bookmarklet to point to the location of the index.html of this project
-on your own server.
+You'll see in `bookmarklet-improved.txt` that there is an example URL such as:
+```
+https://your-hosted-url.com/index.html
+```
+You'll need to update that URL in the bookmarklet to point to the location of `index.html` for this project on your own server.
 
-You will also see my email address contained in the bookmarklet. The purpose of this is to
-remove my email address from the task title when adding a task from Gmail on the web.
-You can replace my gmail address in the bookmarklet with your own, if you like.
+You will also see an email address (replace.with.your.email@gmail.com) contained in the bookmarklet.
+The purpose of this is to strip out that email address from the task title when adding a task from Gmail on the web.
+You can replace it in the bookmarklet with your own Gmail address, if you like.
 The bookmarklet populates the initial task title with the current window's title.
 When you are adding a task to Microsoft To Do from a Gmail message, the code will strip out
-my email address from the task title to make the title more convenient to use in the
-Microsoft Todo task list. By changing it to your gmail address it will strip out your
-email address from the Gmail web page title when generating the initial task title.
+that email address from the task title to make the title more convenient.
 
 # Support
 This script is evolving over time, and it may become something more sophisticated in the future.
@@ -132,4 +147,3 @@ This is with exception of the icons and css in the fontawesome folder which foll
 For similar Bookmarklets that work for Google Tasks instead, please check out:
 - https://github.com/geoff604/google-tasks-bookmarklet-php (for a PHP version)
 - https://github.com/geoff604/google-tasks-bookmarklet (for a Google Apps Script version)
-
