@@ -439,14 +439,19 @@ const SmartDropdown = (function() {
             return;
         }
 
+        // Use updateHighlight instead of renderList to preserve scroll state
         if (e.key === "ArrowDown") {
-            highlightedIndex = Math.min(highlightedIndex + 1, currentResults.length - 1);
-            renderList();
+            if (highlightedIndex < currentResults.length - 1) {
+                highlightedIndex++;
+                updateHighlight();
+            }
         }
 
         if (e.key === "ArrowUp") {
-            highlightedIndex = Math.max(highlightedIndex - 1, 0);
-            renderList();
+            if (highlightedIndex > 0) {
+                highlightedIndex--;
+                updateHighlight();
+            }
         }
     }
 
@@ -500,19 +505,46 @@ const SmartDropdown = (function() {
         if (currentResults.length === 0) {
             $resultsList.append('<li><em style="color:#999;">No matches found</em></li>');
         } else {
-            currentResults.forEach((result, index) => {
+            currentResults.forEach((result) => {
                 const $li = $('<li></li>')
                     .text(result.originalText)
                     .data('value', result.value);
-                
-                if (index === highlightedIndex) {
-                    $li.addClass('highlighted');
-                }
                 $resultsList.append($li);
             });
+            // Apply the initial highlight and scroll position
+            updateHighlight();
         }
 
         $resultsList.show();
+    }
+
+    // --- Visual Updates & Scrolling ---
+    function updateHighlight() {
+        const $items = $resultsList.find('li');
+        $items.removeClass('highlighted');
+        
+        if (highlightedIndex >= 0 && highlightedIndex < $items.length) {
+            const $highlighted = $items.eq(highlightedIndex);
+            $highlighted.addClass('highlighted');
+            
+            // Auto-scroll logic: Keep highlighted item in the visible bounds
+            const container = $resultsList[0];
+            const item = $highlighted[0];
+            
+            const containerTop = container.scrollTop;
+            const containerBottom = containerTop + container.clientHeight;
+            const itemTop = item.offsetTop;
+            const itemBottom = itemTop + item.offsetHeight;
+            
+            // Scroll Up if item is above the visible area
+            if (itemTop < containerTop) {
+                container.scrollTop = itemTop;
+            } 
+            // Scroll Down if item is below the visible area
+            else if (itemBottom > containerBottom) {
+                container.scrollTop = itemBottom - container.clientHeight;
+            }
+        }
     }
 
     // --- Ranking & Algorithm ---

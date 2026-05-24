@@ -395,7 +395,8 @@
       position: absolute;
       top: 100%; 
       left: 0;
-      min-width: 200px; /* Ensure it's wide enough even if select is small */
+      width: 100%; /* Matches the native select exact width */
+      box-sizing: border-box; /* Ensures borders don't push it wider */
       background: var(--bg-secondary);
       border: 1px solid var(--border-color);
       border-radius: 0 0 4px 4px;
@@ -407,6 +408,20 @@
       z-index: 10;
       max-height: 250px;
       overflow-y: auto;
+  }
+
+  /* Apply custom native scrollbar theme to the smart dropdown */
+  #smart-search-results::-webkit-scrollbar {
+      width: 40px; 
+  }
+
+  #smart-search-results::-webkit-scrollbar-thumb {
+      background-color: var(--scrollbar-thumb);
+      border-radius: 6px;
+  }
+
+  #smart-search-results::-webkit-scrollbar-track {
+      background-color: var(--scrollbar-track);
   }
 
   #smart-search-results li {
