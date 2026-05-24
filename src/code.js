@@ -404,12 +404,10 @@ const SmartDropdown = (function() {
             return;
         }
 
+        // Backspace clears the entire search
         if (e.key === "Backspace") {
             e.preventDefault(); // Prevent page back
-            if (searchBuffer.length > 0) {
-                searchBuffer = searchBuffer.slice(0, -1);
-                updateUI();
-            }
+            clearSearch();
             return;
         }
 
@@ -460,7 +458,7 @@ const SmartDropdown = (function() {
     // --- Core Logic & Rendering ---
     function resetInactivityTimeout() {
         clearTimeout(searchTimeout);
-        searchTimeout = setTimeout(clearSearch, 10000); // 10 seconds
+        searchTimeout = setTimeout(clearSearch, 120000); // 120 seconds
     }
 
     function clearSearch() {
