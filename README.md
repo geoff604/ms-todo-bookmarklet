@@ -88,17 +88,31 @@ You cannot simply double-click `index.html` to open it as a `file://` because mo
 
 ---
 
-## What is a Bookmarklet?
-From Wikipedia:
-> A bookmarklet is a bookmark stored in a web browser that contains JavaScript commands that add new features to the browser. Bookmarklets are unobtrusive JavaScripts stored as the URL of a bookmark in a web browser or as a hyperlink on a web page. Bookmarklets are usually JavaScript programs. Regardless of whether bookmarklet utilities are stored as bookmarks or hyperlinks, they add one-click functions to a browser or web page. When clicked, a bookmarklet performs one of a wide variety of operations, such as running a search query or extracting data from a table. For example, clicking on a bookmarklet after selecting text on a webpage could run an Internet search on the selected text and display a search engine results page.
+## 🔖 What is a Bookmarklet?
+
+A bookmarklet is a special bookmark that runs a small script instead of opening a URL. It looks like a normal bookmark in your browser's toolbar, but when you click it, it performs an action on whatever page you're currently viewing — like capturing the page title and sending it to your To-Do app.
+
+**In plain terms:** you click the bookmarklet on any webpage, and a small popup opens with the task title and notes already filled in, ready for you to add to Microsoft To Do in one click.
 
 See: https://en.wikipedia.org/wiki/Bookmarklet
 
-## 🔖 Using the Bookmarklet
+---
 
-You can use a browser bookmarklet to highlight text on any webpage and instantly send it to your Tasks app.
+## 🖱️ How to Use the Bookmarklet
 
-Create a new bookmark in your browser, name it "Add Task", and paste the following code into the **URL** field. *(Make sure to replace `https://your-hosted-url.com/index.html` with your actual live app URL).*
+### What it does
+
+When you click the bookmarklet on any webpage:
+1. It captures the **page title** and uses it as the task title.
+2. It captures any **text you have selected** on the page as the task note. If you haven't selected any text, it uses the **page URL** instead.
+3. It opens a small popup window with your To-Do app, already pre-filled with those details.
+4. You review the title and note, choose your task list, and click **Add**.
+
+### Basic Bookmarklet
+
+This is the simple version. It works on any webpage and requires no customization beyond your app URL.
+
+**Step 1 — Edit the code below.** Replace `https://your-hosted-url.com/index.html` with the actual URL where you have hosted the app (e.g. `https://myname.github.io/ms-todo-bookmarklet/index.html`):
 
 ```javascript
 javascript:(function(){
@@ -110,26 +124,65 @@ javascript:(function(){
 })();
 ```
 
-## Setting Up The Bookmarklet In Your Browser
-I put a more advanced bookmarklet example in the file `bookmarklet-improved.txt`.
-You can add a bookmarklet to your browser bar, by opening the file
-`bookmarklet-improved.txt`, modifying the script as suggested below, and then adding a
-bookmark in your browser with the contents of the file. Clicking on the bookmarklet will open
-the script in a popup window.
+**Step 2 — Create the bookmark.** In your browser:
+* **Chrome / Edge:** Press `Ctrl+Shift+B` (Windows) or `Cmd+Shift+B` (Mac) to show the bookmarks bar. Right-click on the bookmarks bar and choose **Add page...** or **New bookmark**. 
+* **Firefox:** Right-click the bookmarks toolbar and choose **New Bookmark**.
 
-### How to Modify the Example Bookmarklet Before Using It
-You'll see in `bookmarklet-improved.txt` that there is an example URL such as:
+**Step 3 — Fill in the bookmark details:**
+* **Name:** Give it a short label, e.g. `📋 Add Task`
+* **URL:** Paste the full `javascript:(function(){...})();` code from Step 1 into the URL field. *(Yes, the entire block of code goes in the URL field — this is what makes it a bookmarklet.)*
+
+**Step 4 — Click Save.** The bookmarklet now appears in your bookmarks bar. Navigate to any webpage, optionally select some text, then click it to add a task.
+
+---
+
+### Advanced Bookmarklet (Gmail-friendly)
+
+The file `bookmarklet-improved.txt` in this repository contains a more capable version of the bookmarklet with one extra feature: **it automatically cleans up Gmail subject lines** used as task titles.
+
+When you open an email in Gmail, the browser tab title looks something like:
+
+```
+Re: Project update - your.name@gmail.com - Gmail
+```
+
+The advanced bookmarklet strips out your email address and " - Gmail" from the title, leaving just:
+
+```
+Re: Project update
+```
+
+This makes the task title much cleaner without any manual editing.
+
+#### How to set it up
+
+**Step 1 — Open `bookmarklet-improved.txt`** from this repository in a text editor.
+
+**Step 2 — Replace the placeholder URL.** Find the line containing:
 ```
 https://your-hosted-url.com/index.html
 ```
-You'll need to update that URL in the bookmarklet to point to the location of `index.html` for this project on your own server.
+Replace it with the actual URL of your hosted app (the same URL you used in the basic bookmarklet above).
 
-You will also see an email address (replace.with.your.email@gmail.com) contained in the bookmarklet.
-The purpose of this is to strip out that email address from the task title when adding a task from Gmail on the web.
-You can replace it in the bookmarklet with your own Gmail address, if you like.
-The bookmarklet populates the initial task title with the current window's title.
-When you are adding a task to Microsoft To Do from a Gmail message, the code will strip out
-that email address from the task title to make the title more convenient.
+**Step 3 — Replace the placeholder email address.** Find the line containing:
+```
+replace.with.your.email@gmail.com
+```
+Replace it with your own Gmail address. This is the address that will be stripped from Gmail tab titles. If you don't use Gmail, you can leave this as-is or remove the email-stripping line entirely — the bookmarklet will still work.
+
+**Step 4 — Create the bookmark** using the same process as the basic bookmarklet above: right-click your bookmarks bar, choose **New Bookmark**, paste the entire modified contents of `bookmarklet-improved.txt` into the **URL** field, and give it a name like `📋 Add Task (Gmail)`.
+
+#### Choosing between the two
+
+| | Basic bookmarklet | Advanced bookmarklet |
+|---|---|---|
+| Works on any webpage | ✅ | ✅ |
+| Captures page title & URL | ✅ | ✅ |
+| Captures selected text as note | ✅ | ✅ |
+| Cleans up Gmail subject lines | ❌ | ✅ |
+| Requires editing an email address | ❌ | ✅ (optional) |
+
+You can install both and use whichever is appropriate — the basic one for general browsing, and the advanced one when working in Gmail.
 
 # Support
 This script is evolving over time, and it may become something more sophisticated in the future.
