@@ -111,12 +111,13 @@ javascript:(function(){
 ```
 
 ## Setting Up The Bookmarklet In Your Browser
-You will need to add a bookmarklet to your browser bar, by opening the file
+I put a more advanced bookmarklet example in the file `bookmarklet-improved.txt`.
+You can add a bookmarklet to your browser bar, by opening the file
 `bookmarklet-improved.txt`, modifying the script as suggested below, and then adding a
 bookmark in your browser with the contents of the file. Clicking on the bookmarklet will open
 the script in a popup window.
 
-### How to Modify the Bookmarklet Before Using It
+### How to Modify the Example Bookmarklet Before Using It
 You'll see in `bookmarklet-improved.txt` that there is an example URL such as:
 ```
 https://your-hosted-url.com/index.html
