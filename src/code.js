@@ -477,7 +477,7 @@ const SmartDropdown = (function() {
     function selectOption(value) {
         $select.val(value).trigger('change');
         clearSearch();
-        $select.blur(); // Remove focus to fully reset the interaction
+        $select.focus();
     }
 
     function updateUI() {
