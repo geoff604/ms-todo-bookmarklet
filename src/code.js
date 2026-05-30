@@ -252,6 +252,11 @@ function showTaskListsPreservingSelection(taskLists) {
     // Ensure we don't try to restore placeholder text
     var shouldRestoreSelection = selectedValue && selectedItemText && selectedItemText !== "Tasks" && selectedItemText !== "Loading...";
 
+    // Signal to the custom search UI that an intentional background update is beginning
+    if (typeof SmartDropdown !== 'undefined' && SmartDropdown.beginUpdate) {
+        SmartDropdown.beginUpdate();
+    }
+
     showTaskLists(taskLists);
 
     if (shouldRestoreSelection) {
@@ -259,6 +264,11 @@ function showTaskListsPreservingSelection(taskLists) {
     } else {
         // Fallback to first item if we can't/shouldn't restore
         $('#tasklist').prop('selectedIndex', 0);
+    }
+
+    // Finalize the dropdown refresh sequence to re-score options and safe-guard active focus state
+    if (typeof SmartDropdown !== 'undefined' && SmartDropdown.endUpdate) {
+        SmartDropdown.endUpdate();
     }
 }
 
@@ -356,6 +366,7 @@ const SmartDropdown = (function() {
     let searchTimeout = null;
     let highlightedIndex = -1;
     let currentResults = [];
+    let isUpdatingOptions = false;
     
     // DOM Element References
     let $select, $wrapper, $bufferDisplay, $resultsList;
@@ -384,7 +395,7 @@ const SmartDropdown = (function() {
     }
 
     function bindEvents() {
-        $select.on('focus', clearSearch);
+        $select.on('focus', handleFocus);
         $select.on('blur', handleBlur);
         $select.on('keydown', handleKeyDown);
 
@@ -396,6 +407,22 @@ const SmartDropdown = (function() {
     }
 
     // --- Event Handlers ---
+    function handleFocus() {
+        if (isUpdatingOptions) return; // Prevent layout updates from forcing clean state resets
+        clearSearch();
+    }
+
+    function handleBlur() {
+        // Slight delay to allow click events on the results list to fire first
+        setTimeout(function() {
+            if (isUpdatingOptions) return;
+            // Only drop the search if focus has completely moved out of the dropdown interface
+            if (document.activeElement !== $select[0]) {
+                clearSearch();
+            }
+        }, 150);
+    }
+
     function handleKeyDown(e) {
         const isNavigationKey = ["ArrowDown", "ArrowUp", "Enter", "Escape"].includes(e.key);
 
@@ -455,9 +482,23 @@ const SmartDropdown = (function() {
         }
     }
 
-    function handleBlur() {
-        // Slight delay to allow click events on the results list to fire first
-        setTimeout(clearSearch, 150);
+    // --- Lifecycle Hooks for External Rebuilds ---
+    function beginUpdate() {
+        isUpdatingOptions = true;
+    }
+
+    function endUpdate() {
+        // If search results are dropped down, immediately re-score matches using new options list
+        if (searchBuffer) {
+            currentResults = rankOptions(searchBuffer);
+            highlightedIndex = currentResults.length > 0 ? 0 : -1;
+            renderList();
+        }
+        
+        // Use a short delay before lifting lock to safely consume late synchronous events triggered by DOM replacement
+        setTimeout(() => {
+            isUpdatingOptions = false;
+        }, 80);
     }
 
     // --- Core Logic & Rendering ---
@@ -467,6 +508,7 @@ const SmartDropdown = (function() {
     }
 
     function clearSearch() {
+        if (isUpdatingOptions) return;
         searchBuffer = "";
         highlightedIndex = -1;
         currentResults = [];
@@ -632,9 +674,11 @@ const SmartDropdown = (function() {
         return matrix[a.length][b.length];
     }
 
-    // Expose only the initialization method publicly
+    // Expose control methods publicly
     return {
-        init: init
+        init: init,
+        beginUpdate: beginUpdate,
+        endUpdate: endUpdate
     };
 
 })();
