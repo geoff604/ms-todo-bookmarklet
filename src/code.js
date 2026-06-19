@@ -424,6 +424,11 @@ const SmartDropdown = (function() {
     }
 
     function handleKeyDown(e) {
+        // Allow CTRL+SHIFT+ENTER to pass completely through to the global document handler
+        if (e.key === "Enter" && e.ctrlKey && e.shiftKey) {
+            return;
+        }
+
         const isNavigationKey = ["ArrowDown", "ArrowUp", "Enter", "Escape"].includes(e.key);
 
         if (isNavigationKey) {
@@ -692,6 +697,16 @@ $(function() {
     SmartDropdown.init(); 
 
     $('#new-task').bind('submit', onNewTaskFormSubmit);
+
+    // Global keyboard listener for CTRL + SHIFT + ENTER.
+    // Holding down CTRL and SHIFT while pressing the ENTER key will
+    // cause the Add button to be clicked automatically.
+    $(document).on('keydown', function(e) {
+        if (e.key === 'Enter' && e.ctrlKey && e.shiftKey) {
+            e.preventDefault(); // Stop default browser event processing
+            $('#add-button').click(); // Submit task by clicking Add
+        }
+    });
 
     datePicker = $("#task-date").datepicker({
         firstDay: 0,
