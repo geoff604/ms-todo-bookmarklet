@@ -167,9 +167,9 @@ function sortTaskListArray(resultArray) {
 }
 
 /**
-* Load the available task lists using localStorage caching and direct API calls.
-* Fully supports API paging via @odata.nextLink.
-*/
+ * Load the available task lists using localStorage caching and direct API calls.
+ * Fully supports API paging via @odata.nextLink.
+ */
 async function loadTaskLists() {
     const CACHE_KEY = 'taskListsCache';
     
@@ -220,10 +220,10 @@ async function loadTaskLists() {
 }
 
 /**
-* Show the returned task lists in the dropdown box.
-* Automatically selects the first option by default.
-* @param {Array.<Object>} taskLists The task lists to show.
-*/
+ * Show the returned task lists in the dropdown box.
+ * Automatically selects the first option by default.
+ * @param {Array.<Object>} taskLists The task lists to show.
+ */
 function showTaskLists(taskLists) {
     var select = $('#tasklist');
     select.empty();
@@ -241,10 +241,10 @@ function showTaskLists(taskLists) {
 }
 
 /**
-* Show the returned task lists in the dropdown box.
-* The original selection in the box is preserved, otherwise falls back to the first item.
-* @param {Array.<Object>} taskLists The task lists to show.
-*/
+ * Show the returned task lists in the dropdown box.
+ * The original selection in the box is preserved, otherwise falls back to the first item.
+ * @param {Array.<Object>} taskLists The task lists to show.
+ */
 function showTaskListsPreservingSelection(taskLists) {
     var selectedValue = $('#tasklist').val();
     var selectedItemText = $('#tasklist option:selected').text();
@@ -273,10 +273,10 @@ function showTaskListsPreservingSelection(taskLists) {
 }
 
 /**
-* A callback function that runs when the new task form is submitted.
-*/
-async function onNewTaskFormSubmit(e) {
-    e.preventDefault(); // Prevent standard form submission
+ * Handles processing and submission of a new task.
+ * @param {boolean} closeWindowAfterAdd True if the window should automatically close on success.
+ */
+async function submitTask(closeWindowAfterAdd) {
     $("#message").html("<p>Please wait...</p>");
 
     var taskListId = $('#tasklist').val();
@@ -290,7 +290,7 @@ async function onNewTaskFormSubmit(e) {
 
     if (!title.trim()) {
         $("#message").html("<p style='color:red;'>Title is required.</p>");
-        return false;
+        return;
     }
 
     const payload = {
@@ -313,25 +313,27 @@ async function onNewTaskFormSubmit(e) {
         $("#message").html("<p>Task added.</p>");
         titleTextBox.val('');
         noteTextBox.val('');
+
+        if (closeWindowAfterAdd) {
+            window.close();
+        }
     } catch (error) {
         console.error(error);
         $("#message").html("<p style='color:red;'>Unable to add task.</p>");
     }
-
-    return false;
 }
 
 /**
-* Logs an error message and shows an alert to the user.
-*/
+ * Logs an error message and shows an alert to the user.
+ */
 function showError(error) {
     console.log(error);
     window.alert('An error has occurred, please try again.');
 }
 
 /**
-* Apply theme-specific styling to jQuery UI datepicker
-*/
+ * Apply theme-specific styling to jQuery UI datepicker
+ */
 function updateDatepickerTheme() {
     const isDarkMode = document.documentElement.classList.contains('dark-mode');
     if (isDarkMode) {
@@ -696,15 +698,18 @@ $(function() {
     // Initialize custom smart dropdown search UI
     SmartDropdown.init(); 
 
-    $('#new-task').bind('submit', onNewTaskFormSubmit);
+    $('#new-task').on('submit', function(e) {
+        e.preventDefault();
+        submitTask(false /* closeWindowAfterAdd */);
+    });
 
     // Global keyboard listener for CTRL + SHIFT + ENTER.
     // Holding down CTRL and SHIFT while pressing the ENTER key will
-    // cause the Add button to be clicked automatically.
+    // add the current task and then close the window if added successfully.
     $(document).on('keydown', function(e) {
         if (e.key === 'Enter' && e.ctrlKey && e.shiftKey) {
             e.preventDefault(); // Stop default browser event processing
-            $('#add-button').click(); // Submit task by clicking Add
+            submitTask(true /* closeWindowAfterAdd */);   // Call the method with auto-close enabled
         }
     });
 
