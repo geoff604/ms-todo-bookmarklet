@@ -698,6 +698,20 @@ $(function() {
     // Initialize custom smart dropdown search UI
     SmartDropdown.init(); 
 
+    // Position cursor at the beginning of the text when tabbed into
+    let isTitleMousedown = false;
+    $('#task-title').on('mousedown', function() {
+        isTitleMousedown = true;
+    }).on('focus', function() {
+        if (!isTitleMousedown) {
+            const el = this;
+            setTimeout(function() {
+                el.setSelectionRange(0, 0);
+            }, 0);
+        }
+        isTitleMousedown = false;
+    });
+
     $('#new-task').on('submit', function(e) {
         e.preventDefault();
         submitTask(false /* closeWindowAfterAdd */);
