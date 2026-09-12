@@ -1,0 +1,15 @@
+{
+  "name": "ms-todo-bookmarklet",
+  "version": "1.0.0",
+  "private": true,
+  "description": "A browser bookmarklet SPA for adding tasks to Microsoft To Do",
+  "scripts": {
+    "vendor": "node scripts/vendor-libs.js",
+    "postinstall": "node scripts/vendor-libs.js"
+  },
+  "dependencies": {
+    "@azure/msal-browser": "^5.21.0",
+    "jquery": "^4.0.0",
+    "jquery-ui": "^1.14.2"
+  }
+}

@@ -62,7 +62,7 @@ function handleSignedInUser(account) {
     $('#app-content').css('display', 'flex'); 
 
     // Focus on task list so it can accept search typing to select item when it is not dropped down
-    $('#tasklist').focus();
+    $('#tasklist').trigger('focus');
 
     loadTaskLists();
 }
@@ -526,7 +526,7 @@ const SmartDropdown = (function() {
     function selectOption(value) {
         $select.val(value).trigger('change');
         clearSearch();
-        $select.focus();
+        $select.trigger('focus');
     }
 
     function updateUI() {

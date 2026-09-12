@@ -35,6 +35,16 @@ After logging in, the task list dropdown supports a powerful type-to-search feat
 
 Because this is a pure SPA, you do not need PHP or a complex web server. You just need to register the application with Microsoft to get a Client ID, and then host the HTML/JS files anywhere that serves static web pages.
 
+### Step 0: Install Dependencies
+
+This project uses npm purely to manage the versions of its two client-side libraries (jQuery, jQuery UI, and `@azure/msal-browser`) — there is no bundler or build step. After installing, the built browser files are copied into `src/deps/`, which `index.html` loads via plain `<script>`/`<link>` tags, so the app still deploys as static files.
+
+```
+npm install
+```
+
+If you ever want to bump to newer versions of these libraries, edit the version numbers in `package.json`, run `npm install` again (or `npm update`), and it will re-vendor the files into `src/deps/` automatically. You can also re-run the copy step manually with `npm run vendor`.
+
 ### Step 1: Get a Free Microsoft Azure Account
 To connect to the Microsoft Graph API, you need an App Registration in the Azure Portal.
 1. Go to [portal.azure.com](https://portal.azure.com/).
