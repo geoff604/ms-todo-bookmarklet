@@ -90,6 +90,20 @@
     box-shadow: 0 0 0 2px var(--glow-shadow);
   }
 
+  label[for="tasklist"] {
+    position: relative;
+    cursor: pointer;
+  }
+
+  label[for="tasklist"]::after {
+    content: "";
+    position: absolute;
+    top: -16px;
+    bottom: -16px;
+    left: -12px;
+    right: -7px;
+  }
+
   #task-title {
     flex-grow: 1;
     min-width: 0; 
