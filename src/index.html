@@ -13,11 +13,18 @@
   // This page doubles as the MSAL redirectUri, so a login/logout popup (or a
   // hidden silent-token iframe) also loads the *entire app* here. Before
   // jQuery or code.js run, check whether this load is actually MSAL handing
-  // back an auth response to a popup/iframe rather than a real top-level
-  // visit, and if so relay it to the opener/parent and stop — the popup
-  // closes itself once the response has been relayed.
+  // back an auth response rather than a real top-level visit, and if so
+  // relay it to the opener/parent and stop — the popup closes itself once
+  // the response has been relayed.
+  //
+  // Detect this from the URL itself (an MSAL response always carries a
+  // "state" param in the hash or query) rather than from window.opener /
+  // window.parent: Microsoft's login pages send a Cross-Origin-Opener-Policy
+  // header, and navigating the popup there and back can leave the browser
+  // reporting window.opener as null by the time control returns here, even
+  // though this really is the popup MSAL opened.
   window.__msalHandlingPopupResponse = false;
-  if (window.opener || window.parent !== window) {
+  if (/[#?&]state=/.test(window.location.hash + window.location.search)) {
     window.__msalHandlingPopupResponse = true;
     msalRedirectBridge.broadcastResponseToMainFrame().catch(function () {
       // Not actually carrying an MSAL auth response - boot the app normally.
