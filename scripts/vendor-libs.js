@@ -42,3 +42,14 @@ copyFile(
   path.join(nodeModules, "@azure", "msal-browser", "lib", "msal-browser.min.js"),
   "msal-browser.min.js"
 );
+copyFile(
+  path.join(
+    nodeModules,
+    "@azure",
+    "msal-browser",
+    "lib",
+    "redirect-bridge",
+    "msal-redirect-bridge.min.js"
+  ),
+  "msal-redirect-bridge.min.js"
+);

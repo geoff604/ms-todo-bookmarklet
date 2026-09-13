@@ -8,6 +8,23 @@
 <link rel="stylesheet" href="fontawesome/css/solid.min.css">
 
 <script src="deps/msal-browser.min.js"></script>
+<script src="deps/msal-redirect-bridge.min.js"></script>
+<script>
+  // This page doubles as the MSAL redirectUri, so a login/logout popup (or a
+  // hidden silent-token iframe) also loads the *entire app* here. Before
+  // jQuery or code.js run, check whether this load is actually MSAL handing
+  // back an auth response to a popup/iframe rather than a real top-level
+  // visit, and if so relay it to the opener/parent and stop — the popup
+  // closes itself once the response has been relayed.
+  window.__msalHandlingPopupResponse = false;
+  if (window.opener || window.parent !== window) {
+    window.__msalHandlingPopupResponse = true;
+    msalRedirectBridge.broadcastResponseToMainFrame().catch(function () {
+      // Not actually carrying an MSAL auth response - boot the app normally.
+      window.__msalHandlingPopupResponse = false;
+    });
+  }
+</script>
 
 <style>
   :root {

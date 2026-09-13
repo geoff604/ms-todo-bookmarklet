@@ -760,6 +760,15 @@ const SmartDropdown = (function() {
 
 // When the page loads.
 $(function() {
+    // This page is also the MSAL redirectUri: a login/logout popup or a
+    // hidden silent-token iframe loads it too. When index.html's inline
+    // bootstrap script (see <head>) determines this load is actually MSAL
+    // relaying an auth response back to the opener/parent, skip booting the
+    // app here - the popup/iframe closes itself once the relay completes.
+    if (window.__msalHandlingPopupResponse) {
+        return;
+    }
+
     prefillFromUrl();
     initializeAuth();
 
