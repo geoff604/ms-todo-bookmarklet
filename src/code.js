@@ -23,6 +23,34 @@ let datePicker;
 // A variable to hold the active token request (Our "Lock" to prevent concurrency errors)
 let activeTokenRequest = null;
 
+// localStorage key index.html's popup-relay bootstrap checks to decide
+// whether a page load carrying an MSAL auth response is really our popup
+// rather than a crafted link opened as an ordinary tab. localStorage (unlike
+// window.opener/window.name) is scoped only by origin, so it survives the
+// browsing-context-group switch Microsoft's login pages trigger via their
+// Cross-Origin-Opener-Policy header, and a cross-origin attacker page can't
+// write it themselves.
+const POPUP_PENDING_KEY = "msalPopupExpectedUntil";
+const POPUP_PENDING_WINDOW_MS = 2 * 60 * 1000; // well past MSAL's own 60s popup timeout
+
+async function withPopupPending(action) {
+    try {
+        localStorage.setItem(POPUP_PENDING_KEY, String(Date.now() + POPUP_PENDING_WINDOW_MS));
+    } catch (e) {
+        // localStorage unavailable - proceed without the marker; the popup
+        // simply won't be recognized as a relay by index.html's bootstrap.
+    }
+    try {
+        return await action();
+    } finally {
+        try {
+            localStorage.removeItem(POPUP_PENDING_KEY);
+        } catch (e) {
+            // ignore
+        }
+    }
+}
+
 /**
  * Authentication Management
  */
@@ -66,7 +94,7 @@ async function initializeAuth() {
         if ($btn.prop('disabled')) return;
         $btn.prop('disabled', true);
         try {
-            const response = await msalInstance.loginPopup(loginRequest);
+            const response = await withPopupPending(() => msalInstance.loginPopup(loginRequest));
             handleSignedInUser(response.account);
         } catch (error) {
             if (error.errorCode === "interaction_in_progress") {
@@ -85,7 +113,7 @@ async function initializeAuth() {
     });
 
     $('#logout-btn').on('click', () => {
-        msalInstance.logoutPopup().then(() => {
+        withPopupPending(() => msalInstance.logoutPopup()).then(() => {
             window.location.reload();
         });
     });
@@ -143,8 +171,8 @@ async function getAccessToken() {
                     const popupRequest = account
                         ? { ...loginRequest, account }
                         : loginRequest;
-                    const response = await msalInstance.acquireTokenPopup(
-                        popupRequest
+                    const response = await withPopupPending(() =>
+                        msalInstance.acquireTokenPopup(popupRequest)
                     );
                     return response.accessToken;
                 } catch (popupError) {

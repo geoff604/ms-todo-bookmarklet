@@ -24,19 +24,32 @@
   //     relay (URL rewrite, title change, window.close attempt) in an
   //     ordinary top-level tab that was never opened by MSAL.
   //   - Confirmation this window is actually an MSAL-opened popup/iframe.
-  //     window.opener normally proves that, but Microsoft's login pages
-  //     send a Cross-Origin-Opener-Policy header, and navigating the popup
-  //     there and back can leave window.opener null even for a real MSAL
-  //     popup. window.name doesn't have that problem: MSAL names every
-  //     popup it opens "msal.<clientId>...." (see generatePopupName /
-  //     generateLogoutPopupName in msal-browser's PopupClient), and
-  //     window.name survives cross-origin navigation untouched by COOP. A
-  //     plain top-level tab (link click, redirect, typed URL) always starts
-  //     with an empty window.name.
+  //     window.opener and window.name both normally prove that, but
+  //     Microsoft's login pages send a Cross-Origin-Opener-Policy header,
+  //     and navigating the popup there and back triggers a browsing-context-
+  //     group switch that resets BOTH of them to null/"" by the time control
+  //     returns here - confirmed in production (window.opener === null,
+  //     window.name === "" on landing back), even for a real MSAL popup.
+  //     code.js's withPopupPending() works around this: right before calling
+  //     loginPopup/logoutPopup/acquireTokenPopup, it stamps a short-lived
+  //     "a popup is expected" flag into localStorage, which - unlike
+  //     window.opener/name - is scoped only by origin, so it survives the
+  //     browsing-context-group switch, and a cross-origin attacker page has
+  //     no way to write it themselves.
   window.__msalHandlingPopupResponse = false;
+  function popupResponseExpected() {
+    if (window.parent !== window) {
+      return true; // hidden silent-token iframe; unaffected by COOP
+    }
+    try {
+      return Number(localStorage.getItem("msalPopupExpectedUntil")) > Date.now();
+    } catch (e) {
+      return false; // localStorage inaccessible - fail closed
+    }
+  }
   if (
     /[#?&]state=/.test(window.location.hash + window.location.search) &&
-    (window.parent !== window || window.name.indexOf("msal.") === 0)
+    popupResponseExpected()
   ) {
     window.__msalHandlingPopupResponse = true;
     msalRedirectBridge.broadcastResponseToMainFrame().catch(function () {
