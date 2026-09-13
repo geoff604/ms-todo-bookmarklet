@@ -28,20 +28,59 @@ let activeTokenRequest = null;
  */
 async function initializeAuth() {
     await msalInstance.initialize();
-    
-    // Check if user is already signed in
-    const currentAccounts = msalInstance.getAllAccounts();
-    if (currentAccounts.length > 0) {
-        handleSignedInUser(currentAccounts[0]);
+
+    // Clear any stale MSAL interaction state left by a previously
+    // interrupted popup (e.g. page refresh mid-login). Without this,
+    // MSAL throws interaction_in_progress on the very next login attempt.
+    for (const key of Object.keys(sessionStorage)) {
+        if (key.startsWith("msal.") && key.includes("interaction.status")) {
+            sessionStorage.removeItem(key);
+        }
+    }
+
+    // Check if user is already signed in.
+    // MSAL v5: getAllAccounts() returns one entry per tenant profile,
+    // so the same user signed into multiple tenants yields multiple
+    // entries. Prefer getActiveAccount(), then fall back to the first
+    // unique home account to avoid treating one user as many.
+    const activeAccount = msalInstance.getActiveAccount();
+    if (activeAccount) {
+        handleSignedInUser(activeAccount);
+    } else {
+        const allAccounts = msalInstance.getAllAccounts();
+        if (allAccounts.length > 0) {
+            // Deduplicate by homeAccountId and pick the first home account
+            const seen = new Set();
+            const uniqueAccounts = allAccounts.filter(a => {
+                if (seen.has(a.homeAccountId)) return false;
+                seen.add(a.homeAccountId);
+                return true;
+            });
+            handleSignedInUser(uniqueAccounts[0]);
+        }
     }
 
     $('#login-btn').on('click', async () => {
+        // Guard against double-clicks / re-entrant calls while popup is open
+        const $btn = $('#login-btn');
+        if ($btn.prop('disabled')) return;
+        $btn.prop('disabled', true);
         try {
             const response = await msalInstance.loginPopup(loginRequest);
             handleSignedInUser(response.account);
         } catch (error) {
-            console.error("Login failed:", error);
-            showError("Login failed. Please check console for details.");
+            if (error.errorCode === "interaction_in_progress") {
+                // Another popup is already open; ignore the click silently
+                console.warn(
+                    "Login already in progress — " +
+                    "please complete the open popup."
+                );
+            } else {
+                console.error("Login failed:", error);
+                showError("Login failed. Please check console for details.");
+            }
+        } finally {
+            $btn.prop('disabled', false);
         }
     });
 
@@ -80,22 +119,50 @@ async function getAccessToken() {
     // 2. Create the token request promise and store it in our lock variable
     activeTokenRequest = (async () => {
         try {
+            // MSAL v5: acquireTokenSilent requires either request.account or
+            // an active account set on the instance. Be explicit here to
+            // surface a clear error if the session is unexpectedly lost.
+            const account = msalInstance.getActiveAccount();
+            if (!account) {
+                throw new Error(
+                    "No active account — please sign in again."
+                );
+            }
+            const silentRequest = { ...loginRequest, account };
+
             // Try to get the token silently in the background
-            const response = await msalInstance.acquireTokenSilent(loginRequest);
+            const response = await msalInstance.acquireTokenSilent(
+                silentRequest
+            );
             return response.accessToken;
         } catch (error) {
             // If background fails, it means we need the user to interact
             if (error instanceof msal.InteractionRequiredAuthError) {
                 try {
-                    const response = await msalInstance.acquireTokenPopup(loginRequest);
+                    const account = msalInstance.getActiveAccount();
+                    const popupRequest = account
+                        ? { ...loginRequest, account }
+                        : loginRequest;
+                    const response = await msalInstance.acquireTokenPopup(
+                        popupRequest
+                    );
                     return response.accessToken;
                 } catch (popupError) {
                     // Catch the specific interaction error gracefully
                     if (popupError.errorCode === "interaction_in_progress") {
-                        console.warn("An authentication popup is already open. Please complete the login.");
-                    } else if (popupError.errorCode === "popup_window_error") {
-                        // Browsers often block popups that aren't directly clicked by a user
-                        $("#message").html("<p style='color:red;'>Popup blocked. Please click Login again.</p>");
+                        console.warn(
+                            "An authentication popup is already open." +
+                            " Please complete the login."
+                        );
+                    } else if (
+                        popupError.errorCode === "popup_window_error"
+                    ) {
+                        // Browsers often block popups not directly
+                        // triggered by a user gesture
+                        $("#message").html(
+                            "<p style='color:red;'>Popup blocked." +
+                            " Please click Login again.</p>"
+                        );
                         $('#login-btn').show();
                         $('#logout-btn').hide();
                     }
@@ -112,6 +179,7 @@ async function getAccessToken() {
     // Wait for the newly created request to resolve
     return await activeTokenRequest;
 }
+
 
 /**
  * Helper to execute calls against Microsoft Graph API directly
