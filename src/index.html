@@ -17,14 +17,27 @@
   // relay it to the opener/parent and stop — the popup closes itself once
   // the response has been relayed.
   //
-  // Detect this from the URL itself (an MSAL response always carries a
-  // "state" param in the hash or query) rather than from window.opener /
-  // window.parent: Microsoft's login pages send a Cross-Origin-Opener-Policy
-  // header, and navigating the popup there and back can leave the browser
-  // reporting window.opener as null by the time control returns here, even
-  // though this really is the popup MSAL opened.
+  // This needs two signals, not just window.opener:
+  //   - A "state" param in the hash/query, which any real MSAL response
+  //     carries. On its own this isn't enough - it's attacker-suppliable,
+  //     so trusting it alone would let a crafted link/redirect trigger the
+  //     relay (URL rewrite, title change, window.close attempt) in an
+  //     ordinary top-level tab that was never opened by MSAL.
+  //   - Confirmation this window is actually an MSAL-opened popup/iframe.
+  //     window.opener normally proves that, but Microsoft's login pages
+  //     send a Cross-Origin-Opener-Policy header, and navigating the popup
+  //     there and back can leave window.opener null even for a real MSAL
+  //     popup. window.name doesn't have that problem: MSAL names every
+  //     popup it opens "msal.<clientId>...." (see generatePopupName /
+  //     generateLogoutPopupName in msal-browser's PopupClient), and
+  //     window.name survives cross-origin navigation untouched by COOP. A
+  //     plain top-level tab (link click, redirect, typed URL) always starts
+  //     with an empty window.name.
   window.__msalHandlingPopupResponse = false;
-  if (/[#?&]state=/.test(window.location.hash + window.location.search)) {
+  if (
+    /[#?&]state=/.test(window.location.hash + window.location.search) &&
+    (window.parent !== window || window.name.indexOf("msal.") === 0)
+  ) {
     window.__msalHandlingPopupResponse = true;
     msalRedirectBridge.broadcastResponseToMainFrame().catch(function () {
       // Not actually carrying an MSAL auth response - boot the app normally.
