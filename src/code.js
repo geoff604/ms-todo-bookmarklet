@@ -24,6 +24,9 @@ let datePicker;
 // A variable to hold the active token request (Our "Lock" to prevent concurrency errors)
 let activeTokenRequest = null;
 
+// Track window closing state to suppress background network error messages during unload
+let isClosing = false;
+
 /**
  * Authentication Management
  */
@@ -284,6 +287,9 @@ async function loadTaskLists() {
         }
 
     } catch (error) {
+        if (isClosing) {
+            return;
+        }
         $("#message").html("<p style='color:red;'>Failed to load lists. Please refresh.</p>");
         console.error(error);
     }
@@ -385,11 +391,14 @@ async function submitTask(closeWindowAfterAdd) {
         noteTextBox.val('');
 
         if (closeWindowAfterAdd) {
+            isClosing = true;
             window.close();
         }
     } catch (error) {
-        console.error(error);
-        $("#message").html("<p style='color:red;'>Unable to add task.</p>");
+        if (!isClosing) {
+            console.error(error);
+            $("#message").html("<p style='color:red;'>Unable to add task.</p>");
+        }
     }
 }
 
