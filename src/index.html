@@ -217,7 +217,7 @@
     margin-bottom: 10px;
   }
 
-  #add-button {
+  #add-button, #add-close-button {
     padding: 8px 16px;
     background-color: var(--button-bg);
     color: white;
@@ -229,7 +229,11 @@
     transition: background-color 0.2s ease;
   }
 
-  #add-button:hover {
+  #add-button {
+    margin-right: 5px;
+  }
+
+  #add-button:hover, #add-close-button:hover {
     background-color: var(--button-hover);
   }
 
@@ -545,6 +549,7 @@
     <div class="fixed-container">
       <form name="new-task" id="new-task"> 
         <input type="submit" name="add" id="add-button" value="Add" />
+        <input type="button" name="add-close" id="add-close-button" value="Add & Close" />
       </form>
     </div>
   </div>

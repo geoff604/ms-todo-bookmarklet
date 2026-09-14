@@ -822,6 +822,10 @@ $(function() {
         submitTask(false /* closeWindowAfterAdd */);
     });
 
+    $('#add-close-button').on('click', function() {
+        submitTask(true /* closeWindowAfterAdd */);
+    });
+
     // Global keyboard listener for CTRL + SHIFT + ENTER.
     // Holding down CTRL and SHIFT while pressing the ENTER key will
     // add the current task and then close the window if added successfully.
