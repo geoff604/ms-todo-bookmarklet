@@ -169,22 +169,39 @@
 
   #add-button, #add-close-button {
     padding: 8px 16px;
-    background-color: var(--button-bg);
-    color: white;
-    border: none;
     border-radius: 4px;
     cursor: pointer;
     font-weight: 500;
     font-size: 14px;
-    transition: background-color 0.2s ease;
+    box-sizing: border-box;
+    transition: background-color 0.2s ease, border-color 0.2s ease, color 0.2s ease;
   }
 
   #add-button {
     margin-right: 5px;
+    background-color: var(--button-bg);
+    color: white;
+    border: 1px solid transparent;
   }
 
-  #add-button:hover, #add-close-button:hover {
+  #add-button:hover {
     background-color: var(--button-hover);
+  }
+
+  #add-close-button {
+    background-color: var(--bg-secondary);
+    color: var(--text-primary);
+    border: 1px solid var(--border-color);
+  }
+
+  #add-close-button:hover {
+    background-color: var(--border-color);
+  }
+
+  #add-close-button:focus {
+    border-color: var(--glow-color);
+    outline: none;
+    box-shadow: 0 0 0 2px var(--glow-shadow);
   }
 
   input.star {
