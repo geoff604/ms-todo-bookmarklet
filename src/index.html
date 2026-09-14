@@ -8,56 +8,6 @@
 <link rel="stylesheet" href="fontawesome/css/solid.min.css">
 
 <script src="deps/msal-browser.min.js"></script>
-<script src="deps/msal-redirect-bridge.min.js"></script>
-<script>
-  // This page doubles as the MSAL redirectUri, so a login/logout popup (or a
-  // hidden silent-token iframe) also loads the *entire app* here. Before
-  // jQuery or code.js run, check whether this load is actually MSAL handing
-  // back an auth response rather than a real top-level visit, and if so
-  // relay it to the opener/parent and stop — the popup closes itself once
-  // the response has been relayed.
-  //
-  // This needs two signals, not just window.opener:
-  //   - A "state" param in the hash/query, which any real MSAL response
-  //     carries. On its own this isn't enough - it's attacker-suppliable,
-  //     so trusting it alone would let a crafted link/redirect trigger the
-  //     relay (URL rewrite, title change, window.close attempt) in an
-  //     ordinary top-level tab that was never opened by MSAL.
-  //   - Confirmation this window is actually an MSAL-opened popup/iframe.
-  //     window.opener and window.name both normally prove that, but
-  //     Microsoft's login pages send a Cross-Origin-Opener-Policy header,
-  //     and navigating the popup there and back triggers a browsing-context-
-  //     group switch that resets BOTH of them to null/"" by the time control
-  //     returns here - confirmed in production (window.opener === null,
-  //     window.name === "" on landing back), even for a real MSAL popup.
-  //     code.js's withPopupPending() works around this: right before calling
-  //     loginPopup/logoutPopup/acquireTokenPopup, it stamps a short-lived
-  //     "a popup is expected" flag into localStorage, which - unlike
-  //     window.opener/name - is scoped only by origin, so it survives the
-  //     browsing-context-group switch, and a cross-origin attacker page has
-  //     no way to write it themselves.
-  window.__msalHandlingPopupResponse = false;
-  function popupResponseExpected() {
-    if (window.parent !== window) {
-      return true; // hidden silent-token iframe; unaffected by COOP
-    }
-    try {
-      return Number(localStorage.getItem("msalPopupExpectedUntil")) > Date.now();
-    } catch (e) {
-      return false; // localStorage inaccessible - fail closed
-    }
-  }
-  if (
-    /[#?&]state=/.test(window.location.hash + window.location.search) &&
-    popupResponseExpected()
-  ) {
-    window.__msalHandlingPopupResponse = true;
-    msalRedirectBridge.broadcastResponseToMainFrame().catch(function () {
-      // Not actually carrying an MSAL auth response - boot the app normally.
-      window.__msalHandlingPopupResponse = false;
-    });
-  }
-</script>
 
 <style>
   :root {

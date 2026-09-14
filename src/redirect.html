@@ -1,0 +1,17 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>Authenticating...</title>
+    <script src="deps/msal-browser.min.js"></script>
+    <script src="deps/msal-redirect-bridge.min.js"></script>
+    <script>
+        // Relays the auth token response back to the main app window and closes this popup
+        msalRedirectBridge.broadcastResponseToMainFrame().catch(function (error) {
+            console.error("Authentication relay error:", error);
+        });
+    </script>
+</head>
+<body>
+</body>
+</html>

@@ -10,7 +10,8 @@ It is built using HTML, CSS, JavaScript, and the Microsoft Authentication Librar
 
 ## 🚀 Key Features
 * **Zero Backend Required:** 100% client-side authentication. No server-side secrets or databases to maintain.
-* **Highly Secure:** Uses the modern OAuth 2.0 Authorization Code Flow with PKCE via MSAL.js. Tokens are stored securely in your browser.
+* **Highly Secure & Best-Practice Auth:** Uses OAuth 2.0 Authorization Code Flow with PKCE via MSAL.js. Tokens are handled cleanly via a dedicated, lightweight `redirect.html` callback page following Microsoft best practices.
+* **"Add & Close" Action:** Includes an "Add & Close" button next to "Add" that submits the task and automatically closes the popup window on success. You can also press `Ctrl` + `Shift` + `Enter` anywhere in the app to trigger this action.
 * **Lightning Fast:** Caches your task lists in local browser storage so the app loads instantly on return visits.
 * **Bookmarklet Ready:** Accepts `startingTitle` and `startingNote` URL parameters to easily add tasks from any web page.
 * **Smart Fuzzy Search:** Type any part of a task list name to instantly filter and navigate the dropdown — no need to open it first. Supports emoji-aware matching, keyboard navigation, and auto-scrolling to the best match.
@@ -33,11 +34,11 @@ After logging in, the task list dropdown supports a powerful type-to-search feat
 
 ## 🛠️ How to Set Up Your Own Instance
 
-Because this is a pure SPA, you do not need PHP or a complex web server. You just need to register the application with Microsoft to get a Client ID, and then host the HTML/JS files anywhere that serves static web pages.
+Because this is a pure SPA, you do not need PHP or a complex web server. You just need to register the application with Microsoft to get a Client ID, and then host the static files (`index.html`, `redirect.html`, and `code.js`) as well as the dependencies (in the deps folder), anywhere that serves static web pages.
 
 ### Step 0: Install Dependencies
 
-This project uses npm purely to manage the versions of its two client-side libraries (jQuery, jQuery UI, and `@azure/msal-browser`) — there is no bundler or build step. After installing, the built browser files are copied into `src/deps/`, which `index.html` loads via plain `<script>`/`<link>` tags, so the app still deploys as static files.
+This project uses npm purely to manage the versions of its client-side libraries (`jQuery`, `jQuery UI`, `@azure/msal-browser`, and `msal-redirect-bridge`) — there is no bundler or build step. After installing, the built browser files are copied into `src/deps/`, which `index.html` and `redirect.html` load via plain `<script>`/`<link>` tags, so the app still deploys as static files.
 
 ```
 npm install
@@ -59,8 +60,8 @@ To connect to the Microsoft Graph API, you need an App Registration in the Azure
 5. **Supported account types:** Select the 3rd option: *"Accounts in any organizational directory and personal Microsoft accounts (e.g. Skype, Xbox)"*.
 6. **Redirect URI:**
    * In the dropdown, select **Single-page application (SPA)**.
-   * Enter the exact URL where you will host this app (e.g., `https://your-domain.com/index.html`).
-   * *Tip for local testing: You can enter `http://localhost:8000/index.html` for now and add your live URL later.*
+   * Enter the exact URL pointing to `redirect.html` where you will host this app (e.g., `https://your-domain.com/redirect.html`).
+   * *Tip for local testing: You can enter `http://localhost:8000/redirect.html` for local testing.*
 7. Click **Register**.
 
 ### Step 3: Get Your Client ID
@@ -83,13 +84,13 @@ To connect to the Microsoft Graph API, you need an App Registration in the Azure
 
 ## 🌐 Hosting the App
 
-Because this app consists solely of static files (`index.html` and `code.js`), you can host it almost anywhere for free.
+Because this app consists solely of static files (`index.html`, `redirect.html`, and `code.js`), you can host it almost anywhere for free.
 
 **Option A: GitHub Pages (Recommended & Free)**
 1. Create a new repository on GitHub and upload the project files.
 2. Go to the repository **Settings** -> **Pages**.
 3. Under "Source", select the `main` branch and click Save.
-4. In a few minutes, your app will be live. *Don't forget to add this new GitHub Pages URL to your Azure App Registration's Redirect URIs!*
+4. In a few minutes, your app will be live. *Don't forget to add your live `redirect.html` GitHub Pages URL to your Azure App Registration's Redirect URIs!*
 
 **Option B: Local Testing**
 You cannot simply double-click `index.html` to open it as a `file://` because modern browser security blocks API authentication from local files. You must serve it over a local web server.
@@ -116,7 +117,7 @@ When you click the bookmarklet on any webpage:
 1. It captures the **page title** and uses it as the task title.
 2. It captures any **text you have selected** on the page as the task note. If you haven't selected any text, it uses the **page URL** instead.
 3. It opens a small popup window with your To-Do app, already pre-filled with those details.
-4. You review the title and note, choose your task list, and click **Add**.
+4. You review the title and note, choose your task list, and click **Add** or **Add & Close**.
 
 ### Basic Bookmarklet
 
