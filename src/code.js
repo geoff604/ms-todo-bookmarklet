@@ -480,6 +480,13 @@ const SmartDropdown = (function() {
         $select.on('blur', handleBlur);
         $select.on('keydown', handleKeyDown);
 
+        // Prevent Chrome from opening the native dropdown picker on label click,
+        // while preserving focus so SmartDropdown fuzzy search can be typed into.
+        $('label[for="tasklist"]').on('click', function(e) {
+            e.preventDefault();
+            $select.trigger('focus');
+        });
+
         // Handle mouse clicks on custom dropdown items
         $resultsList.on('mousedown', 'li', function(e) {
             e.preventDefault(); // Prevent blur on select
